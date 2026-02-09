@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>NBA Analytics</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<h1>NBA Analytics</h1>
+
+<form action="/player" class="search-form">
+    <input type="text" name="name" placeholder="Jugador (ej: Wembanyama)" required>
+    <button>Buscar</button>
+</form>
+
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+{% if player %}
+<div class="player-container">
+    <div class="team-sidebar" id="team-sidebar">
+        <div class="sidebar-header">Team</div>
+        <div id="team-players-list" class="team-players-list"></div>
+    </div>
+    
+    <div class="player-main-content">
+        <div class="main-card card">
+    <div class="player-header">
+        <div class="player-info">
+            <h2 id="player-name" data-player="{{ player }}">{{ player }}</h2>
+            <p class="player-position" id="player-position"></p>
+        </div>
+        <div class="player-stats-top">
+            <div class="stat-value" id="total-value">--</div>
+            <div class="stat-label">PTS</div>
+        </div>
+    </div>
+
+    <div class="stats-and-controls-row">
+        <div class="quick-stats">
+            <div class="quick-stat">
+                <span class="qs-label">25/26</span>
+                <span class="qs-value" id="qs-games">--</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">H2H</span>
+                <span class="qs-value" id="qs-h2h">--</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">L5</span>
+                <span class="qs-value" id="qs-l5">--</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">L10</span>
+                <span class="qs-value" id="qs-l10">--</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">L20</span>
+                <span class="qs-value" id="qs-l20">--</span>
+            </div>
+        </div>
+
+        <div class="range-controls">
+            <button data-range="5">L5</button>
+            <button data-range="10" class="active">L10</button>
+            <button data-range="20">L20</button>
+            <button data-range="h2h">H2H</button>
+        </div>
+    </div>
+
+    <div class="chart-section">
+        <div id="line-controls" class="line-controls">
+            <button id="line-down">◀</button>
+            <span>Linea: <strong id="line-value">--</strong></span>
+            <button id="line-up">▶</button>
+            <span style="margin-left:1rem;color:rgba(255, 255, 255, 0.87)">Avg: <strong id="avg-value">--</strong></span>
+        </div>
+        <div id="win-rate-indicators" class="win-rate-indicators"></div>
+        <div class="chart-container">
+            <canvas id="pointsChart"></canvas>
+        </div>
+    </div>
+
+    <div class="stat-buttons-row">
+        <button data-stat="points" class="active">PTS</button>
+        <button data-stat="rebounds">REB</button>
+        <button data-stat="assists">AST</button>
+        <button data-stat="pra">PRA</button>
+        <button data-stat="pa">PA</button>
+        <button data-stat="pr">PR</button>
+        <button data-stat="ra">RA</button>
+        <button data-stat="minutes">MIN</button>
+        <button data-stat="steals">STL</button>
+        <button data-stat="blocks">BLK</button>
+        <button data-stat="fgm">FGM</button>
+        <button data-stat="fga">FGA</button>
+        <button data-stat="fg3m">3PM</button>
+        <button data-stat="fg3a">3PA</button>
+        <button data-stat="turnovers">TO</button>
+        <button data-stat="fouls">FOULS</button>
+    </div>
+</div>
+    </div>
+</div>
+{% endif %}
+
+<div class="games_today-card">
+    <h2>🏀 Partidos de hoy</h2>
+
+    {% if today_games %}
+        <ul class="today-games">
+        {% for g in today_games %}
+            <li>
+                <div class="away-team">
+                    <strong>{{ g.away_team }}</strong>
+                </div>
+                <div class="time-display">
+                    <span class="status">{{ g.start_time_arg or g.start_time }}</span>
+                </div>
+                <div class="home-team">
+                    <strong>{{ g.home_team }}</strong>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay partidos hoy.</p>
+    {% endif %}
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="{{ url_for('static', filename='js/team_emojis.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/points_chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/player_display.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/player_filters.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/team_sidebar.js') }}"></script>
+
+</body>
+</html>
