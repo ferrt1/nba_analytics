@@ -19,9 +19,13 @@ def get_db():
 
 @app.route("/")
 def index():
+    try:
+        today_games = get_today_games()
+    except Exception:
+        today_games = []
     return render_template(
         "index.html",
-        today_games=get_today_games()
+        today_games=today_games
     )
 
 
@@ -43,20 +47,23 @@ def player():
     
 
     if not row:
+        try:
+            today_games = get_today_games()
+        except Exception:
+            today_games = []
         return render_template(
             "index.html",
             error="Jugador no encontrado",
-            today_games=get_today_games()
+            today_games=today_games
         )
-    # determine player's current team (from latest player_stats) and map to full team name via games
+    # determine player's current team — only real NBA tricodes (excludes All-Star game)
     cur.execute("""
         SELECT team_tricode
         FROM player_stats
         WHERE player_name = ? AND team_tricode IS NOT NULL
         ORDER BY id DESC
-        LIMIT 1
     """, (row["player_name"],))
-    trow = cur.fetchone()
+    trow = next((r for r in cur.fetchall() if r[0] in NBA_TRICODES), None)
     player_team = None
     if trow:
         tricode = trow[0]
@@ -77,11 +84,15 @@ def player():
 
     conn.close()
 
+    try:
+        today_games = get_today_games()
+    except Exception:
+        today_games = []
     return render_template(
         "index.html",
         player=row["player_name"],
         player_team=player_team,
-        today_games=get_today_games()
+        today_games=today_games
     )
 
 
@@ -115,15 +126,14 @@ def player_stats_api():
         opponent = None
         player_team = None
 
-        # try to get player's current team tricode from most recent stats
+        # try to get player's current team tricode — only real NBA tricodes (excludes All-Star)
         cur.execute("""
             SELECT team_tricode, game_id
             FROM player_stats
             WHERE player_name = ? AND team_tricode IS NOT NULL
             ORDER BY id DESC
-            LIMIT 1
         """, (player,))
-        row = cur.fetchone()
+        row = next((r for r in cur.fetchall() if r[0] in NBA_TRICODES), None)
         if row:
             player_team = row[0]
 
@@ -238,22 +248,27 @@ def player_stats_api():
     }
 
 
+NBA_TRICODES = {
+    'ATL','BOS','BKN','CHA','CHI','CLE','DAL','DEN','DET','GSW',
+    'HOU','IND','LAC','LAL','MEM','MIA','MIL','MIN','NOP','NYK',
+    'OKC','ORL','PHI','PHX','POR','SAC','SAS','TOR','UTA','WAS'
+}
+
 @app.route("/api/team_players")
 def team_players_api():
     player = request.args.get("player")
-    
+
     conn = get_db()
     cur = conn.cursor()
-    
-    # Get the player's team
+
+    # Get the player's team — only consider real NBA tricodes (excludes All-Star game)
     cur.execute("""
         SELECT DISTINCT team_tricode
         FROM player_stats
         WHERE player_name = ? AND team_tricode IS NOT NULL
         ORDER BY id DESC
-        LIMIT 1
     """, (player,))
-    trow = cur.fetchone()
+    trow = next((r for r in cur.fetchall() if r[0] in NBA_TRICODES), None)
     
     if not trow:
         conn.close()

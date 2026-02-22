@@ -160,11 +160,6 @@ def update_for_date(d: date, reset_db: bool = False):
     """
     games = get_games_on_date(d)
 
-    # Guardar un snapshot con la fecha
-    snapshot_path = DATA_DIR / f"games_{d.strftime('%Y-%m-%d')}.json"
-    with open(snapshot_path, "w", encoding="utf-8") as f:
-        json.dump(games, f, indent=2, ensure_ascii=False)
-
     # Conectar DB
     if reset_db and DB_PATH.exists():
         DB_PATH.unlink()

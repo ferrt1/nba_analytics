@@ -3,7 +3,6 @@
 from nba_api.stats.endpoints import leaguegamefinder
 from pathlib import Path
 import json
-from datetime import datetime
 import math
 
 
@@ -39,9 +38,8 @@ def fetch_games_for_season(season: str) -> list[dict]:
 
 
 def save_games(season: str, games: list[dict]) -> None:
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     season_safe = season.replace("-", "_")
-    file_path = DATA_DIR / f"games_{season_safe}_{timestamp}.json"
+    file_path = DATA_DIR / f"games_{season_safe}.json"
 
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(games, f, indent=2)
