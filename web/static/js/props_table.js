@@ -48,9 +48,14 @@
         return `<td class="pct-cell ${cls}">${val}%</td>`;
     }
 
+    function toDecimal(american) {
+        if (american > 0) return ((american / 100) + 1).toFixed(2);
+        return ((100 / Math.abs(american)) + 1).toFixed(2);
+    }
+
     function oddsCell(val) {
         if (val === null || val === undefined) return '<td class="odds-cell muted">—</td>';
-        return `<td class="odds-cell">${val > 0 ? '+' : ''}${val}</td>`;
+        return `<td class="odds-cell">${toDecimal(val)}</td>`;
     }
 
     function streakCell(val) {
