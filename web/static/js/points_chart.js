@@ -1,9 +1,26 @@
 let chart;
+let _chartValues = [];
+let _chartStubHeight = 0;
+
+// Update only the threshold line and bar colors — no chart recreation, no animation
+function updateChartLine(threshold) {
+    if (!chart) return;
+    const len = chart.data.labels.length;
+    const colors = _chartValues.map(v =>
+        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#16a34a" : "#dc2626"
+    );
+    chart.data.datasets[2].data = Array(len).fill(threshold);
+    chart.data.datasets[1].backgroundColor = colors;
+    chart.update('none');
+}
 
 function renderPointsChart(labels, values, dates, threshold, stat) {
     const ctx = document.getElementById("pointsChart");
 
     if (chart) chart.destroy();
+
+    // Store values for updateChartLine()
+    _chartValues = values;
 
     const thresholdLine = Array(values.length).fill(threshold);
 
@@ -14,6 +31,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
 
     // Stub height: small gray base at the bottom of each bar
     const stubHeight = Math.max(0.5, Math.round(maxVal * 0.025 * 2) / 2);
+    _chartStubHeight = stubHeight;
     const mainValues = values.map(v =>
         typeof v === 'number' && !isNaN(v) ? Math.max(0, v - stubHeight) : v
     );
@@ -77,6 +95,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
             ]
         },
         options: {
+            animation: false,
             responsive: true,
             layout: { padding: { top: 48, right: 10, left: 10, bottom: 12 } },
             maintainAspectRatio: false,

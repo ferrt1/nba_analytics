@@ -28,7 +28,7 @@ const teamLogos = {
     "Timberwolves": "https://cdn.nba.com/logos/nba/1610612750/global/L/logo.svg",
     "Pelicans": "https://cdn.nba.com/logos/nba/1610612740/global/L/logo.svg",
     "Thunder": "https://cdn.nba.com/logos/nba/1610612760/global/L/logo.svg",
-    "Phoenix Suns": "https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg",
+    "Suns": "https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg",
     "Trail Blazers": "https://cdn.nba.com/logos/nba/1610612757/global/L/logo.svg",
     "Kings": "https://cdn.nba.com/logos/nba/1610612762/global/L/logo.svg",
     "Spurs": "https://cdn.nba.com/logos/nba/1610612759/global/L/logo.svg",

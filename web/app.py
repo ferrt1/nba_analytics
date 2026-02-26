@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import sqlite3
+import json
 import sys
 import os
 
@@ -254,6 +255,31 @@ NBA_TRICODES = {
     'OKC','ORL','PHI','PHX','POR','SAC','SAS','TOR','UTA','WAS'
 }
 
+TEAM_NAME_TO_TRICODE = {
+    "Atlanta Hawks": "ATL", "Boston Celtics": "BOS", "Brooklyn Nets": "BKN",
+    "Charlotte Hornets": "CHA", "Chicago Bulls": "CHI", "Cleveland Cavaliers": "CLE",
+    "Dallas Mavericks": "DAL", "Denver Nuggets": "DEN", "Detroit Pistons": "DET",
+    "Golden State Warriors": "GSW", "Houston Rockets": "HOU", "Indiana Pacers": "IND",
+    "Los Angeles Clippers": "LAC", "Los Angeles Lakers": "LAL", "Memphis Grizzlies": "MEM",
+    "Miami Heat": "MIA", "Milwaukee Bucks": "MIL", "Minnesota Timberwolves": "MIN",
+    "New Orleans Pelicans": "NOP", "New York Knicks": "NYK", "Oklahoma City Thunder": "OKC",
+    "Orlando Magic": "ORL", "Philadelphia 76ers": "PHI", "Phoenix Suns": "PHX",
+    "Portland Trail Blazers": "POR", "Sacramento Kings": "SAC", "San Antonio Spurs": "SAS",
+    "Toronto Raptors": "TOR", "Utah Jazz": "UTA", "Washington Wizards": "WAS",
+}
+
+PROPS_STAT_SQL = {
+    "points":   "ps.points",
+    "rebounds": "ps.rebounds",
+    "assists":  "ps.assists",
+    "pra":      "(ps.points + ps.rebounds + ps.assists)",
+    "fg3m":     "ps.fg3m",
+    "blocks":   "ps.blocks",
+    "steals":   "ps.steals",
+}
+
+ODDS_CACHE_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw', 'odds_cache.json')
+
 @app.route("/api/team_players")
 def team_players_api():
     player = request.args.get("player")
@@ -290,6 +316,151 @@ def team_players_api():
     conn.close()
     
     return {"players": players}
+
+
+@app.route("/api/props")
+def props_api():
+    import unicodedata
+
+    stat_filter = request.args.get("stat", "points")
+    game_filter = request.args.get("game", "")      # "Away @ Home" or ""
+    limit       = min(int(request.args.get("limit", "20")), 50)
+
+    try:
+        with open(ODDS_CACHE_PATH) as f:
+            cache = json.load(f)
+        props_raw = cache.get("props", [])
+    except Exception:
+        return jsonify({"props": [], "matchups": []})
+
+    # Unique matchups for the frontend game-filter dropdown
+    matchups = sorted({
+        f"{p['away_team']} @ {p['home_team']}"
+        for p in props_raw
+        if p.get("away_team") and p.get("home_team")
+    })
+
+    if stat_filter not in PROPS_STAT_SQL:
+        return jsonify({"props": [], "matchups": matchups})
+
+    # Filter by stat first — reduces 725 → ~100 props
+    filtered = [
+        p for p in props_raw
+        if p.get("stat") == stat_filter and p.get("line") is not None
+    ]
+    if game_filter:
+        filtered = [
+            p for p in filtered
+            if f"{p.get('away_team','')} @ {p.get('home_team','')}" == game_filter
+        ]
+    if not filtered:
+        return jsonify({"props": [], "matchups": matchups})
+
+    expr = PROPS_STAT_SQL[stat_filter]
+    conn = get_db()
+    cur  = conn.cursor()
+
+    def _norm(s):
+        return unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode().lower().strip()
+
+    def find_player(name):
+        parts = name.strip().split()
+        last  = parts[-1] if parts else name
+        cur.execute(
+            "SELECT DISTINCT player_name FROM player_stats WHERE player_name LIKE ? LIMIT 30",
+            (f"%{last}%",)
+        )
+        norm_target = _norm(name)
+        for (pname,) in cur.fetchall():
+            if _norm(pname) == norm_target:
+                return pname
+        # Fallback: first + last partial
+        if len(parts) >= 2:
+            cur.execute(
+                "SELECT DISTINCT player_name FROM player_stats "
+                "WHERE player_name LIKE ? AND player_name LIKE ? LIMIT 1",
+                (f"%{parts[0]}%", f"%{last}%")
+            )
+            row = cur.fetchone()
+            if row:
+                return row[0]
+        return None
+
+    def player_data(db_player, line, home_tc, away_tc):
+        """One query, all stats computed in Python."""
+        cur.execute(f"""
+            SELECT g.season, g.home_tricode, g.away_tricode, ps.team_tricode,
+                   CAST({expr} AS REAL) AS val
+            FROM player_stats ps
+            JOIN games g ON ps.game_id = g.game_id
+            WHERE ps.player_name = ?
+            ORDER BY g.game_date DESC LIMIT 100
+        """, (db_player,))
+        rows = [(s, htc, atc, ptc, v) for s, htc, atc, ptc, v in cur.fetchall() if v is not None]
+
+        all_v   = [v for *_, v in rows]
+        s2526   = [v for s, _, _, _, v in rows if s == "22025"]
+        s2425   = [v for s, _, _, _, v in rows if s == "22024"]
+        h2h_v   = [v for _, htc, atc, _, v in rows
+                   if home_tc and away_tc and
+                      ((htc == home_tc and atc == away_tc) or (htc == away_tc and atc == home_tc))]
+
+        def rate(lst, lim=None):
+            sub = lst[:lim] if lim else lst
+            if not sub: return None
+            return round(sum(1 for v in sub if v >= float(line)) / len(sub) * 100)
+
+        stk = 0
+        if all_v:
+            d = 1 if all_v[0] >= float(line) else -1
+            for v in all_v:
+                if (v >= float(line)) == (d == 1): stk += d
+                else: break
+
+        return {
+            "streak":     stk,
+            "pct_season": rate(s2526),
+            "pct_h2h":    rate(h2h_v),
+            "pct_l5":     rate(all_v, 5),
+            "pct_l10":    rate(all_v, 10),
+            "pct_l20":    rate(all_v, 20),
+            "pct_prev":   rate(s2425),
+        }
+
+    result  = []
+    seen    = set()
+
+    for prop in filtered:
+        api_name = prop["player"]
+        line     = prop["line"]
+        dedup_key = (api_name, round(float(line) * 2))
+        if dedup_key in seen:
+            continue
+        seen.add(dedup_key)
+
+        db_player = find_player(api_name)
+        if not db_player:
+            continue
+
+        home_tc = TEAM_NAME_TO_TRICODE.get(prop.get("home_team", ""))
+        away_tc = TEAM_NAME_TO_TRICODE.get(prop.get("away_team", ""))
+        stats   = player_data(db_player, line, home_tc, away_tc)
+
+        result.append({
+            "player":     db_player,
+            "stat":       stat_filter,
+            "line":       line,
+            "over_odds":  prop.get("over_odds"),
+            "under_odds": prop.get("under_odds"),
+            "matchup":    f"{prop.get('away_team','?')} @ {prop.get('home_team','?')}",
+            **stats,
+        })
+
+        if len(result) >= limit:
+            break
+
+    conn.close()
+    return jsonify({"props": result, "matchups": matchups})
 
 
 if __name__ == "__main__":

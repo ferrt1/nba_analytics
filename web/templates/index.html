@@ -107,6 +107,49 @@
 </div>
 {% endif %}
 
+<div class="props-card" id="props-section">
+    <div class="props-header">
+        <div class="props-header-left">
+            <h2>Props de hoy</h2>
+            <select id="props-game-select" class="props-game-select">
+                <option value="">Todos los partidos</option>
+            </select>
+        </div>
+        <div class="props-stat-tabs" id="props-stat-tabs">
+            <button class="active" data-stat="points">PTS</button>
+            <button data-stat="rebounds">REB</button>
+            <button data-stat="assists">AST</button>
+            <button data-stat="pra">PRA</button>
+            <button data-stat="fg3m">3PM</button>
+            <button data-stat="blocks">BLK</button>
+            <button data-stat="steals">STL</button>
+        </div>
+    </div>
+    <div id="props-table-wrap">
+        <table class="props-table" id="props-table">
+            <thead>
+                <tr>
+                    <th class="sortable" data-col="player">JUGADOR</th>
+                    <th class="sortable" data-col="line">L</th>
+                    <th>O</th>
+                    <th>U</th>
+                    <th class="sortable" data-col="streak">STK</th>
+                    <th class="sortable" data-col="pct_season">25/26</th>
+                    <th class="sortable" data-col="pct_h2h">H2H</th>
+                    <th class="sortable" data-col="pct_l5">L5</th>
+                    <th class="sortable" data-col="pct_l10">L10</th>
+                    <th class="sortable" data-col="pct_l20">L20</th>
+                    <th class="sortable" data-col="pct_prev">24/25</th>
+                </tr>
+            </thead>
+            <tbody id="props-tbody"></tbody>
+        </table>
+        <p id="props-empty" style="display:none; color:var(--muted); font-size:13px; padding:12px 0;">
+            No hay props disponibles. Asegúrate de que el archivo de odds esté actualizado.
+        </p>
+    </div>
+</div>
+
 <div class="games_today-card">
     <h2>Partidos de hoy</h2>
 
@@ -138,6 +181,7 @@
     <script src="{{ url_for('static', filename='js/player_display.js') }}"></script>
     <script src="{{ url_for('static', filename='js/player_filters.js') }}"></script>
     <script src="{{ url_for('static', filename='js/team_sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/props_table.js') }}"></script>
 
 </body>
 </html>

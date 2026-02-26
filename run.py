@@ -76,6 +76,11 @@ def main():
     if not run_command(f"{sys.executable} scripts/db/load_stats.py", "Carga de stats en DB"):
         print("⚠️  Continuando sin actualizar stats en DB...")
 
+    # Paso 6: Descargar props / líneas de casinos (The Odds API)
+    print("🎰 Actualizando props de casinos...")
+    if not run_command(f"{sys.executable} scripts/fetch/fetch_odds.py", "Descarga de props (The Odds API)"):
+        print("⚠️  Continuando sin actualizar props...")
+
     # Iniciar servidor Flask
     print("🚀 Iniciando servidor en http://localhost:5000")
     print("   Presiona Ctrl+C para detener el servidor\n")

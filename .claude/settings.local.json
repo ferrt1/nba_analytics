@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(sqlite3:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(.venv/Scripts/python -c \"import dotenv; print\\(''ok''\\)\")"
     ]
   }
 }
