@@ -3,7 +3,10 @@
     "allow": [
       "Bash(sqlite3:*)",
       "Bash(git restore:*)",
-      "Bash(.venv/Scripts/python -c \"import dotenv; print\\(''ok''\\)\")"
+      "Bash(.venv/Scripts/python -c \"import dotenv; print\\(''ok''\\)\")",
+      "Bash(grep -i \"all.star\\\\|asg\" c:/Users/Fer/Desktop/nba-analytics/data/raw/games_*.json)",
+      "Bash(python3:*)",
+      "Bash(python -c \":*)"
     ]
   }
 }

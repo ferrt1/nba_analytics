@@ -11,7 +11,10 @@
 <h1>NBA Analytics</h1>
 
 <form action="/player" class="search-form">
-    <input type="text" name="name" placeholder="Jugador (ej: Wembanyama)" required>
+    <div class="search-input-wrap">
+        <input type="text" name="name" placeholder="Jugador (ej: Wembanyama)" required autocomplete="off">
+        <div id="search-suggestions" class="search-suggestions"></div>
+    </div>
     <button>Buscar</button>
 </form>
 
@@ -67,6 +70,7 @@
             <button data-range="5">L5</button>
             <button data-range="10" class="active">L10</button>
             <button data-range="20">L20</button>
+            <button data-range="30">L30</button>
             <button data-range="h2h">H2H</button>
         </div>
     </div>
@@ -77,6 +81,7 @@
             <span>Linea: <strong id="line-value">--</strong></span>
             <button id="line-up">▶</button>
             <span style="margin-left:1rem;color:rgba(255, 255, 255, 0.87)">Avg: <strong id="avg-value">--</strong></span>
+            <span id="filter-badge" class="filter-badge" style="display:none;"></span>
         </div>
         <div id="win-rate-indicators" class="win-rate-indicators"></div>
         <div class="chart-container">
@@ -95,6 +100,7 @@
         <button data-stat="minutes">MIN</button>
         <button data-stat="steals">STL</button>
         <button data-stat="blocks">BLK</button>
+        <button data-stat="sb">S+B</button>
         <button data-stat="fgm">FGM</button>
         <button data-stat="fga">FGA</button>
         <button data-stat="fg3m">3PM</button>
@@ -120,9 +126,17 @@
             <button data-stat="rebounds">REB</button>
             <button data-stat="assists">AST</button>
             <button data-stat="pra">PRA</button>
+            <button data-stat="pa">PA</button>
+            <button data-stat="pr">PR</button>
+            <button data-stat="ra">RA</button>
             <button data-stat="fg3m">3PM</button>
+            <button data-stat="fg3a">3PA</button>
+            <button data-stat="fga">FGA</button>
             <button data-stat="blocks">BLK</button>
             <button data-stat="steals">STL</button>
+            <button data-stat="sb">S+B</button>
+            <button data-stat="turnovers">TO</button>
+            <button data-stat="fouls">FOULS</button>
         </div>
     </div>
     <div id="props-table-wrap">
@@ -181,6 +195,7 @@
     <script src="{{ url_for('static', filename='js/player_display.js') }}"></script>
     <script src="{{ url_for('static', filename='js/player_filters.js') }}"></script>
     <script src="{{ url_for('static', filename='js/team_sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/search_autocomplete.js') }}"></script>
     <script src="{{ url_for('static', filename='js/props_table.js') }}"></script>
 
 </body>

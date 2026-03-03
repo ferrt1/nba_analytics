@@ -3,9 +3,9 @@ REM NBA Analytics Launcher - Windows Batch Script
 REM Ejecuta el launcher de Python
 
 echo.
-echo ╔═══════════════════════════════════════════════════════════╗
-echo ║          🏀 NBA ANALYTICS LAUNCHER 🏀                    ║
-echo ╚═══════════════════════════════════════════════════════════╝
+echo  -----------------------------------------------
+echo     NBA ANALYTICS LAUNCHER
+echo  -----------------------------------------------
 echo.
 
 REM Cambiar al directorio del proyecto

@@ -6,8 +6,8 @@
 
     if (!tbody) return;
 
-    let currentStat = 'points';
-    let currentGame = '';
+    let currentStat = localStorage.getItem('props_stat') || 'points';
+    let currentGame = localStorage.getItem('props_game') || '';
     let sortCol  = 'pct_season';
     let sortDir  = -1;
     let allProps = [];
@@ -19,12 +19,14 @@
         tabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentStat = btn.dataset.stat;
+        localStorage.setItem('props_stat', currentStat);
         load();
     });
 
     // ── Game filter ──────────────────────────────────────────────
     gameSelEl.addEventListener('change', () => {
         currentGame = gameSelEl.value;
+        localStorage.setItem('props_game', currentGame);
         load();
     });
 
@@ -113,9 +115,9 @@
     }
 
     function populateGameSelect(matchups) {
-        const current = gameSelEl.value;
+        const saved = currentGame;
         gameSelEl.innerHTML = '<option value="">Todos los partidos</option>' +
-            matchups.map(m => `<option value="${m}"${m === current ? ' selected' : ''}>${m}</option>`).join('');
+            matchups.map(m => `<option value="${m}"${m === saved ? ' selected' : ''}>${m}</option>`).join('');
     }
 
     function load() {
@@ -145,5 +147,14 @@
             });
     }
 
-    document.addEventListener('DOMContentLoaded', load);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Restore active stat tab from localStorage
+        if (currentStat !== 'points') {
+            tabs.querySelectorAll('button').forEach(b => {
+                b.classList.toggle('active', b.dataset.stat === currentStat);
+            });
+        }
+        // Restore game filter after matchups populate (handled in populateGameSelect)
+        load();
+    });
 })();

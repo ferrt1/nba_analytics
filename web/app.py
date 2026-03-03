@@ -102,6 +102,8 @@ def player_stats_api():
     player = request.args.get("player")
     stat = request.args.get("stat", "points")
     limit = request.args.get("limit", "10")
+    with_player = request.args.get("with_player", "")
+    without_player = request.args.get("without_player", "")
 
     conn = get_db()
     cur = conn.cursor()
@@ -111,6 +113,10 @@ def player_stats_api():
         "rebounds": "ps.rebounds",
         "assists": "ps.assists",
         "pra": "(ps.points + ps.rebounds + ps.assists)",
+        "pa": "(ps.points + ps.assists)",
+        "pr": "(ps.points + ps.rebounds)",
+        "ra": "(ps.rebounds + ps.assists)",
+        "sb": "(ps.steals + ps.blocks)",
         "minutes": "ps.minutes",
         "steals": "ps.steals",
         "blocks": "ps.blocks",
@@ -121,6 +127,16 @@ def player_stats_api():
         "turnovers": "ps.turnovers",
         "fouls": "ps.fouls"
     }[stat]
+
+    # Teammate filter (with/without)
+    teammate_filter = ""
+    teammate_params = []
+    if with_player:
+        teammate_filter = "AND ps.game_id IN (SELECT game_id FROM player_stats WHERE player_name = ?)"
+        teammate_params = [with_player]
+    elif without_player:
+        teammate_filter = "AND ps.game_id NOT IN (SELECT game_id FROM player_stats WHERE player_name = ?)"
+        teammate_params = [without_player]
 
     # H2H special: determine opponent using today's schedule when possible
     if limit == "h2h":
@@ -162,13 +178,14 @@ def player_stats_api():
                     {stat_sql} AS value
                 FROM player_stats ps
                 JOIN games g ON ps.game_id = g.game_id
-                WHERE ps.player_name = ? AND (
+                WHERE ps.player_name = ? AND g.season NOT LIKE '3%'
+                  AND ps.minutes NOT IN ('0:00', '0', '') AND (
                     (g.home_tricode = ? AND g.away_tricode = ?) OR
                     (g.away_tricode = ? AND g.home_tricode = ?)
-                )
+                ) {teammate_filter}
                 ORDER BY g.game_date DESC
                 LIMIT ?
-            """, (player, player_team, opponent, player_team, opponent, h2h_limit))
+            """, (player, player_team, opponent, player_team, opponent, *teammate_params, h2h_limit))
             rows = cur.fetchall()
         else:
             # fallback: return last 10 games normally
@@ -179,10 +196,11 @@ def player_stats_api():
                     {stat_sql} AS value
                 FROM player_stats ps
                 JOIN games g ON ps.game_id = g.game_id
-                WHERE ps.player_name = ?
+                WHERE ps.player_name = ? AND g.season NOT LIKE '3%'
+                  AND ps.minutes NOT IN ('0:00', '0', '') {teammate_filter}
                 ORDER BY g.game_date DESC
                 LIMIT 10
-            """, (player,))
+            """, (player, *teammate_params))
             rows = cur.fetchall()
     else:
         cur.execute(f"""
@@ -192,10 +210,11 @@ def player_stats_api():
                 {stat_sql} AS value
             FROM player_stats ps
             JOIN games g ON ps.game_id = g.game_id
-            WHERE ps.player_name = ?
+            WHERE ps.player_name = ? AND g.season NOT LIKE '3%'
+              AND ps.minutes NOT IN ('0:00', '0', '') {teammate_filter}
             ORDER BY g.game_date DESC
             LIMIT ?
-        """, (player, int(limit)))
+        """, (player, *teammate_params, int(limit)))
 
         rows = cur.fetchall()
     conn.close()
@@ -273,12 +292,43 @@ PROPS_STAT_SQL = {
     "rebounds": "ps.rebounds",
     "assists":  "ps.assists",
     "pra":      "(ps.points + ps.rebounds + ps.assists)",
+    "pa":       "(ps.points + ps.assists)",
+    "pr":       "(ps.points + ps.rebounds)",
+    "ra":       "(ps.rebounds + ps.assists)",
     "fg3m":     "ps.fg3m",
+    "fg3a":     "ps.fg3a",
+    "fga":      "ps.fga",
     "blocks":   "ps.blocks",
     "steals":   "ps.steals",
+    "sb":       "(ps.steals + ps.blocks)",
+    "turnovers":"ps.turnovers",
+    "fouls":    "ps.fouls",
 }
 
 ODDS_CACHE_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw', 'odds_cache.json')
+
+@app.route("/api/player_search")
+def player_search_api():
+    q = request.args.get("q", "").strip()
+    if len(q) < 2:
+        return jsonify({"players": []})
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT DISTINCT player_name
+        FROM player_stats
+        WHERE player_name LIKE ? AND team_tricode IN (
+            'ATL','BOS','BKN','CHA','CHI','CLE','DAL','DEN','DET','GSW',
+            'HOU','IND','LAC','LAL','MEM','MIA','MIL','MIN','NOP','NYK',
+            'OKC','ORL','PHI','PHX','POR','SAC','SAS','TOR','UTA','WAS'
+        )
+        ORDER BY player_name
+        LIMIT 8
+    """, (f"%{q}%",))
+    players = list(dict.fromkeys(r[0] for r in cur.fetchall()))
+    conn.close()
+    return jsonify({"players": players})
+
 
 @app.route("/api/team_players")
 def team_players_api():
@@ -393,7 +443,8 @@ def props_api():
                    CAST({expr} AS REAL) AS val
             FROM player_stats ps
             JOIN games g ON ps.game_id = g.game_id
-            WHERE ps.player_name = ?
+            WHERE ps.player_name = ? AND g.season NOT LIKE '3%'
+              AND ps.minutes NOT IN ('0:00', '0', '')
             ORDER BY g.game_date DESC LIMIT 100
         """, (db_player,))
         rows = [(s, htc, atc, ptc, v) for s, htc, atc, ptc, v in cur.fetchall() if v is not None]
@@ -456,8 +507,9 @@ def props_api():
             **stats,
         })
 
-        if len(result) >= limit:
-            break
+    # Sort by best season hit rate so the top picks appear first
+    result.sort(key=lambda r: r.get("pct_season") if r.get("pct_season") is not None else -1, reverse=True)
+    result = result[:limit]
 
     conn.close()
     return jsonify({"props": result, "matchups": matchups})

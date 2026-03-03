@@ -17,20 +17,66 @@
     let userAdjusted = false;
     let allStatsData = {};
     let loadGen = 0; // generation counter to cancel stale fetches
+    let withPlayer = null;
+    let withoutPlayer = null;
 
     const compositeMap = {
         pa: ['points', 'assists'],
         pr: ['points', 'rebounds'],
         ra: ['rebounds', 'assists'],
-        pra: ['points', 'rebounds', 'assists']
+        pra: ['points', 'rebounds', 'assists'],
+        sb: ['steals', 'blocks']
+    };
+
+    function teammateFilterParam() {
+        if (withPlayer) return `&with_player=${encodeURIComponent(withPlayer)}`;
+        if (withoutPlayer) return `&without_player=${encodeURIComponent(withoutPlayer)}`;
+        return '';
+    }
+
+    function updateFilterBadge() {
+        const badge = document.getElementById('filter-badge');
+        if (!badge) return;
+        if (withPlayer) {
+            badge.textContent = `C/ ${withPlayer.split(' ').slice(-1)[0]}`;
+            badge.className = 'filter-badge filter-with';
+            badge.style.display = 'inline-block';
+        } else if (withoutPlayer) {
+            badge.textContent = `S/ ${withoutPlayer.split(' ').slice(-1)[0]}`;
+            badge.className = 'filter-badge filter-without';
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // Exposed globally so team_sidebar.js can call it
+    window.setTeammateFilter = function(name, mode) {
+        if (mode === 'with' && withPlayer === name) {
+            withPlayer = null;
+        } else if (mode === 'without' && withoutPlayer === name) {
+            withoutPlayer = null;
+        } else {
+            withPlayer = mode === 'with' ? name : null;
+            withoutPlayer = mode === 'without' ? name : null;
+        }
+        allStatsData = {};
+        userAdjusted = false;
+        updateFilterBadge();
+        loadChart();
+    };
+
+    window.getTeammateFilter = function() {
+        return { withPlayer, withoutPlayer };
     };
 
     function fetchForRange(stat, range) {
+        const fp = teammateFilterParam();
         if (compositeMap[stat]) {
             const comps = compositeMap[stat];
             return Promise.all(
                 comps.map(s =>
-                    fetch(`/api/player_stats?player=${encodeURIComponent(currentPlayer)}&stat=${s}&limit=${range}`)
+                    fetch(`/api/player_stats?player=${encodeURIComponent(currentPlayer)}&stat=${s}&limit=${range}${fp}`)
                         .then(r => r.json())
                         .catch(() => ({ labels: [], values: [], dates: [], avg: 0 }))
                 )
@@ -50,13 +96,13 @@
                 return combined;
             });
         }
-        return fetch(`/api/player_stats?player=${encodeURIComponent(currentPlayer)}&stat=${stat}&limit=${range}`)
+        return fetch(`/api/player_stats?player=${encodeURIComponent(currentPlayer)}&stat=${stat}&limit=${range}${fp}`)
             .then(r => r.json())
             .catch(() => ({ labels: [], values: [], dates: [], avg: 0 }));
     }
 
     function calculateWinRates(line) {
-        const ranges = [5, 10, 20, 'h2h'];
+        const ranges = [5, 10, 20, 30, 'h2h'];
         const winRates = {};
         ranges.forEach(range => {
             if (allStatsData[range]) {
@@ -95,7 +141,7 @@
 
     function loadChart() {
         const gen = ++loadGen; // increment — any pending fetch with a lower gen is stale
-        const ranges = [5, 10, 20, 'h2h'];
+        const ranges = [5, 10, 20, 30, 'h2h'];
         const promises = ranges.map(range =>
             fetchForRange(currentStat, range).then(data => {
                 allStatsData[range] = data;
@@ -111,7 +157,8 @@
             if (rangeStr === '5')         data = dataList[0];
             else if (rangeStr === '10')   data = dataList[1];
             else if (rangeStr === '20')   data = dataList[2];
-            else if (rangeStr === 'h2h')  data = dataList[3];
+            else if (rangeStr === '30')   data = dataList[3];
+            else if (rangeStr === 'h2h')  data = dataList[4];
             else                          data = dataList[1];
 
             const avgRounded = Math.round(data.avg * 2) / 2;
@@ -124,7 +171,7 @@
             updateWinRateIndicators(currentLine);
 
             if (typeof updateQuickStats === 'function') {
-                updateQuickStats(dataList[0], dataList[1], dataList[2], dataList[3]);
+                updateQuickStats(dataList[0], dataList[1], dataList[2], dataList[4]);
             }
 
             renderPointsChart(data.labels, data.values, data.dates, currentLine, currentStat);

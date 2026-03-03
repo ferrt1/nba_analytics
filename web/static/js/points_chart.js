@@ -44,6 +44,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
 
     const statLabels = {
         points: 'Pts', rebounds: 'Reb', assists: 'Ast', pra: 'PRA',
+        pa: 'PA', pr: 'PR', ra: 'RA', sb: 'S+B',
         minutes: 'Min', steals: 'Stl', blocks: 'Blk', fgm: 'FGM',
         fga: 'FGA', fg3m: '3PM', fg3a: '3PA', turnovers: 'TO', fouls: 'Fouls'
     };
@@ -110,8 +111,8 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                         label: function(item) {
                             if (item.dataset.label === '_base') return null;
                             const idx = item.dataIndex;
-                            const total = (mainValues[idx] ?? 0) + stubHeight;
-                            const display = Number.isInteger(total) ? total : total.toFixed(1);
+                            const original = _chartValues[idx];
+                            const display = Number.isInteger(original) ? original : (original ?? 0).toFixed(1);
                             const date = dates && dates[idx] ? dates[idx] : '';
                             return `${statLabel}: ${display}` + (date ? ` — ${date}` : '');
                         }
@@ -129,9 +130,10 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     borderRadius: 0,
                     padding: { top: 6, bottom: 6, left: 0, right: 0 },
                     font: { weight: "700", size: 14 },
-                    formatter: (value) => {
-                        const total = value + stubHeight;
-                        return Number.isInteger(total) ? total : total.toFixed(1);
+                    formatter: (value, context) => {
+                        const original = _chartValues[context.dataIndex];
+                        if (typeof original !== 'number' || isNaN(original)) return '';
+                        return Number.isInteger(original) ? original : original.toFixed(1);
                     },
                     offset: -8
                 }
