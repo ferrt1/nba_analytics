@@ -37,11 +37,11 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     );
     const colors = values.map(v => (v >= threshold ? "#22c55e" : "#ef4444"));
 
-    // Dynamic bar sizing — thinner when fewer bars to avoid huge gaps
+    // Dynamic bar sizing
     const count = values.length;
-    const BAR_PERCENTAGE = count <= 10 ? 0.7 : 0.9;
-    const CATEGORY_PERCENTAGE = count <= 10 ? 0.7 : 0.9;
-    const MAX_BAR_THICKNESS = count <= 5 ? 36 : count <= 10 ? 44 : 52;
+    const BAR_PERCENTAGE = count <= 5 ? 0.5 : count <= 10 ? 0.6 : 0.85;
+    const CATEGORY_PERCENTAGE = count <= 5 ? 0.5 : count <= 10 ? 0.6 : 0.85;
+    const MAX_BAR_THICKNESS = count <= 5 ? 28 : count <= 10 ? 36 : 48;
 
     const statLabels = {
         points: 'Pts', rebounds: 'Reb', assists: 'Ast', pra: 'PRA',
@@ -129,15 +129,15 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     align: "end",
                     backgroundColor: "transparent",
                     borderRadius: 0,
-                    padding: { top: 1, bottom: 1, left: 0, right: 0 },
+                    padding: { top: 4, bottom: 4, left: 0, right: 0 },
                     font: function() {
                         const mobile = window.innerWidth <= 768;
                         const n = values.length;
-                        if (mobile && n > 20) return { weight: "700", size: 7 };
-                        if (mobile && n > 10) return { weight: "700", size: 8 };
-                        if (mobile) return { weight: "700", size: 10 };
-                        if (n > 20) return { weight: "700", size: 10 };
-                        return { weight: "700", size: 12 };
+                        if (mobile && n > 20) return { weight: "700", size: 8 };
+                        if (mobile && n > 10) return { weight: "700", size: 9 };
+                        if (mobile) return { weight: "700", size: 11 };
+                        if (n > 20) return { weight: "700", size: 11 };
+                        return { weight: "700", size: 14 };
                     },
                     formatter: (value, context) => {
                         const original = _chartValues[context.dataIndex];
