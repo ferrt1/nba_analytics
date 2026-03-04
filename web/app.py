@@ -17,28 +17,38 @@ from datetime import date
 TODAY_GAMES_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw', 'today_games.json')
 _games_cache = {"data": [], "ts": 0, "fetching": False}
 
+def _load_today_games_file():
+    """Load today's games from JSON file (instant, no API call)."""
+    try:
+        if os.path.exists(TODAY_GAMES_PATH):
+            with open(TODAY_GAMES_PATH, 'r') as f:
+                data = json.load(f)
+            if data.get("date") == str(date.today()):
+                return data.get("games", [])
+    except Exception:
+        pass
+    return None
+
 def get_today_games_cached():
     now = time.time()
-    if now - _games_cache["ts"] > 1800 and not _games_cache["fetching"]:
-        _games_cache["fetching"] = True
-        def _fetch():
-            try:
-                # First try loading from file (works on VPS where NBA API is blocked)
-                if os.path.exists(TODAY_GAMES_PATH):
-                    with open(TODAY_GAMES_PATH, 'r') as f:
-                        data = json.load(f)
-                    if data.get("date") == str(date.today()):
-                        _games_cache["data"] = data.get("games", [])
-                        _games_cache["ts"] = time.time()
-                        _games_cache["fetching"] = False
-                        return
-                # Fallback to NBA API (works on localhost)
-                _games_cache["data"] = get_today_games()
-            except Exception:
-                _games_cache["data"] = []
-            _games_cache["ts"] = time.time()
-            _games_cache["fetching"] = False
-        threading.Thread(target=_fetch, daemon=True).start()
+    if now - _games_cache["ts"] > 1800:
+        # Try file first (instant, no network needed)
+        file_games = _load_today_games_file()
+        if file_games is not None:
+            _games_cache["data"] = file_games
+            _games_cache["ts"] = now
+            return _games_cache["data"]
+        # Fallback to NBA API in background (for localhost)
+        if not _games_cache["fetching"]:
+            _games_cache["fetching"] = True
+            def _fetch():
+                try:
+                    _games_cache["data"] = get_today_games()
+                except Exception:
+                    _games_cache["data"] = []
+                _games_cache["ts"] = time.time()
+                _games_cache["fetching"] = False
+            threading.Thread(target=_fetch, daemon=True).start()
     return _games_cache["data"]
 
 
