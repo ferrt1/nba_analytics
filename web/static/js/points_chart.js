@@ -37,10 +37,11 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     );
     const colors = values.map(v => (v >= threshold ? "#22c55e" : "#ef4444"));
 
-    // Fixed bar sizing — bars always the same width regardless of count
-    const BAR_PERCENTAGE = 0.98;
-    const CATEGORY_PERCENTAGE = 0.98;
-    const MAX_BAR_THICKNESS = 52;
+    // Dynamic bar sizing — thinner when fewer bars to avoid huge gaps
+    const count = values.length;
+    const BAR_PERCENTAGE = count <= 10 ? 0.7 : 0.9;
+    const CATEGORY_PERCENTAGE = count <= 10 ? 0.7 : 0.9;
+    const MAX_BAR_THICKNESS = count <= 5 ? 36 : count <= 10 ? 44 : 52;
 
     const statLabels = {
         points: 'Pts', rebounds: 'Reb', assists: 'Ast', pra: 'PRA',
@@ -120,12 +121,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                 },
                 datalabels: {
                     display: function(context) {
-                        if (context.dataset.label !== statLabel) return false;
-                        // On mobile with many bars, show every other label
-                        if (window.innerWidth <= 768 && values.length > 15) {
-                            return context.dataIndex % 2 === 0;
-                        }
-                        return true;
+                        return context.dataset.label === statLabel;
                     },
                     clip: false,
                     color: "#ffffff",
@@ -133,14 +129,15 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     align: "end",
                     backgroundColor: "transparent",
                     borderRadius: 0,
-                    padding: window.innerWidth <= 768
-                        ? { top: 1, bottom: 1, left: 0, right: 0 }
-                        : { top: 6, bottom: 6, left: 0, right: 0 },
+                    padding: { top: 1, bottom: 1, left: 0, right: 0 },
                     font: function() {
                         const mobile = window.innerWidth <= 768;
-                        if (mobile && values.length > 20) return { weight: "700", size: 8 };
+                        const n = values.length;
+                        if (mobile && n > 20) return { weight: "700", size: 7 };
+                        if (mobile && n > 10) return { weight: "700", size: 8 };
                         if (mobile) return { weight: "700", size: 10 };
-                        return { weight: "700", size: 14 };
+                        if (n > 20) return { weight: "700", size: 10 };
+                        return { weight: "700", size: 12 };
                     },
                     formatter: (value, context) => {
                         const original = _chartValues[context.dataIndex];

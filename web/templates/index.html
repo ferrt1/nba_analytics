@@ -90,6 +90,21 @@
         </div>
     </div>
 
+    <div class="minutes-filter-section">
+        <div class="minutes-header">
+            <span class="minutes-title">Minutes</span>
+            <span class="minutes-avg" id="minutes-avg-label">Avg: --</span>
+        </div>
+        <div class="minutes-slider-wrap">
+            <span class="minutes-val" id="min-minutes-val">0</span>
+            <div class="range-slider-container" id="minutes-slider-container">
+                <input type="range" id="min-minutes-slider" min="0" max="48" value="0" step="1">
+                <input type="range" id="max-minutes-slider" min="0" max="48" value="48" step="1">
+            </div>
+            <span class="minutes-val" id="max-minutes-val">48</span>
+        </div>
+    </div>
+
     <div class="stat-buttons-row">
         <button data-stat="points" class="active">PTS</button>
         <button data-stat="rebounds">REB</button>
@@ -197,6 +212,7 @@
     <script src="{{ url_for('static', filename='js/player_filters.js') }}"></script>
     <script src="{{ url_for('static', filename='js/team_sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/search_autocomplete.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/minutes_filter.js') }}"></script>
     <script src="{{ url_for('static', filename='js/props_table.js') }}"></script>
 
 </body>

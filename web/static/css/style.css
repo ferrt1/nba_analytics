@@ -452,7 +452,7 @@ h2, h3 {
 }
 
 .chart-container canvas {
-    height: 280px !important;
+    height: 230px !important;
 }
 
 /* ── Line controls ─────────────────────── */
@@ -525,6 +525,103 @@ h2, h3 {
 
 .win-rate-value.good { color: var(--good); }
 .win-rate-value.bad  { color: var(--bad); }
+
+/* ── Minutes filter ─────────────────────── */
+.minutes-filter-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.minutes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.minutes-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-bright);
+}
+
+.minutes-avg {
+    font-size: 13px;
+    color: var(--muted-light);
+    font-weight: 600;
+}
+
+.minutes-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.minutes-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    min-width: 20px;
+    text-align: center;
+}
+
+.range-slider-container {
+    position: relative;
+    flex: 1;
+    height: 28px;
+}
+
+.range-slider-container input[type="range"] {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    pointer-events: none;
+    height: 28px;
+    margin: 0;
+}
+
+.range-slider-container input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: var(--border-light);
+    border-radius: 2px;
+}
+
+.range-slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--panel);
+    cursor: pointer;
+    pointer-events: auto;
+    margin-top: -7px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.range-slider-container input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: var(--border-light);
+    border-radius: 2px;
+    border: none;
+}
+
+.range-slider-container input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--panel);
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
 
 /* ── Stat buttons row ──────────────────── */
 .stat-buttons-row {

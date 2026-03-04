@@ -34,6 +34,15 @@
         return '';
     }
 
+    function minutesFilterParam() {
+        if (typeof window.getMinutesFilter !== 'function') return '';
+        const f = window.getMinutesFilter();
+        let s = '';
+        if (f.min_minutes !== undefined) s += `&min_minutes=${f.min_minutes}`;
+        if (f.max_minutes !== undefined) s += `&max_minutes=${f.max_minutes}`;
+        return s;
+    }
+
     function updateFilterBadge() {
         const badge = document.getElementById('filter-badge');
         if (!badge) return;
@@ -71,7 +80,7 @@
     };
 
     function fetchForRange(stat, range) {
-        const fp = teammateFilterParam();
+        const fp = teammateFilterParam() + minutesFilterParam();
         if (compositeMap[stat]) {
             const comps = compositeMap[stat];
             return Promise.all(
@@ -234,6 +243,12 @@
         updateWinRateIndicators(currentLine);
         updateChartLine(currentLine);
     });
+
+    // Exposed for minutes_filter.js
+    window.reloadChartWithMinutes = function () {
+        allStatsData = {};
+        loadChart();
+    };
 
     document.addEventListener("DOMContentLoaded", loadChart);
 })();

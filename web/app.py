@@ -135,6 +135,8 @@ def player_stats_api():
     limit = request.args.get("limit", "10")
     with_player = request.args.get("with_player", "")
     without_player = request.args.get("without_player", "")
+    min_minutes = request.args.get("min_minutes", "")
+    max_minutes = request.args.get("max_minutes", "")
 
     conn = get_db()
     cur = conn.cursor()
@@ -168,6 +170,16 @@ def player_stats_api():
     elif without_player:
         teammate_filter = "AND ps.game_id NOT IN (SELECT game_id FROM player_stats WHERE player_name = ?)"
         teammate_params = [without_player]
+
+    # Minutes range filter
+    minutes_filter = ""
+    minutes_params = []
+    if min_minutes:
+        minutes_filter += " AND CAST(SUBSTR(ps.minutes, 1, INSTR(ps.minutes || ':', ':') - 1) AS INTEGER) >= ?"
+        minutes_params.append(int(min_minutes))
+    if max_minutes:
+        minutes_filter += " AND CAST(SUBSTR(ps.minutes, 1, INSTR(ps.minutes || ':', ':') - 1) AS INTEGER) <= ?"
+        minutes_params.append(int(max_minutes))
 
     # H2H special: determine opponent using today's schedule when possible
     if limit == "h2h":
@@ -213,10 +225,10 @@ def player_stats_api():
                   AND ps.minutes NOT IN ('0:00', '0', '') AND (
                     (g.home_tricode = ? AND g.away_tricode = ?) OR
                     (g.away_tricode = ? AND g.home_tricode = ?)
-                ) {teammate_filter}
+                ) {teammate_filter} {minutes_filter}
                 ORDER BY g.game_date DESC
                 LIMIT ?
-            """, (player, player_team, opponent, player_team, opponent, *teammate_params, h2h_limit))
+            """, (player, player_team, opponent, player_team, opponent, *teammate_params, *minutes_params, h2h_limit))
             rows = cur.fetchall()
         else:
             # fallback: return last 10 games normally
@@ -228,10 +240,10 @@ def player_stats_api():
                 FROM player_stats ps
                 JOIN games g ON ps.game_id = g.game_id
                 WHERE ps.player_name = ? AND g.season NOT LIKE '3%'
-                  AND ps.minutes NOT IN ('0:00', '0', '') {teammate_filter}
+                  AND ps.minutes NOT IN ('0:00', '0', '') {teammate_filter} {minutes_filter}
                 ORDER BY g.game_date DESC
                 LIMIT 10
-            """, (player, *teammate_params))
+            """, (player, *teammate_params, *minutes_params))
             rows = cur.fetchall()
     else:
         cur.execute(f"""
@@ -242,10 +254,10 @@ def player_stats_api():
             FROM player_stats ps
             JOIN games g ON ps.game_id = g.game_id
             WHERE ps.player_name = ? AND g.season NOT LIKE '3%'
-              AND ps.minutes NOT IN ('0:00', '0', '') {teammate_filter}
+              AND ps.minutes NOT IN ('0:00', '0', '') {teammate_filter} {minutes_filter}
             ORDER BY g.game_date DESC
             LIMIT ?
-        """, (player, *teammate_params, int(limit)))
+        """, (player, *teammate_params, *minutes_params, int(limit)))
 
         rows = cur.fetchall()
     conn.close()
@@ -297,6 +309,38 @@ def player_stats_api():
         "dates": dates_out,
         "avg": avg
     }
+
+
+@app.route("/api/player_minutes_range")
+def player_minutes_range_api():
+    player = request.args.get("player", "")
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT ps.minutes
+        FROM player_stats ps
+        JOIN games g ON ps.game_id = g.game_id
+        WHERE ps.player_name = ? AND g.season NOT LIKE '3%%'
+          AND ps.minutes NOT IN ('0:00', '0', '')
+        ORDER BY g.game_date DESC
+        LIMIT 82
+    """, (player,))
+    rows = cur.fetchall()
+    conn.close()
+
+    mins = []
+    for r in rows:
+        try:
+            val = str(r["minutes"])
+            parts = val.split(":")
+            mins.append(int(parts[0]) if len(parts) >= 1 else 0)
+        except Exception:
+            pass
+
+    if not mins:
+        return {"min": 0, "max": 48, "avg": 0}
+
+    return {"min": min(mins), "max": max(mins), "avg": round(sum(mins) / len(mins))}
 
 
 NBA_TRICODES = {
