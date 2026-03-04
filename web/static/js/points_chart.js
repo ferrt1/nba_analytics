@@ -128,8 +128,8 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     align: "end",
                     backgroundColor: "transparent",
                     borderRadius: 0,
-                    padding: { top: 6, bottom: 6, left: 0, right: 0 },
-                    font: { weight: "700", size: 14 },
+                    padding: window.innerWidth <= 768 ? { top: 2, bottom: 2, left: 0, right: 0 } : { top: 6, bottom: 6, left: 0, right: 0 },
+                    font: { weight: "700", size: window.innerWidth <= 768 ? 9 : 14 },
                     formatter: (value, context) => {
                         const original = _chartValues[context.dataIndex];
                         if (typeof original !== 'number' || isNaN(original)) return '';

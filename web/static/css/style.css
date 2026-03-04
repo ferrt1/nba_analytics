@@ -981,6 +981,37 @@ td { font-size: 13px; }
         min-width: 120px;
     }
 
+    /* Roster: compact horizontal scroll */
+    .team-sidebar {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+
+    .team-players-list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+    }
+
+    .team-player-item {
+        font-size: 11px;
+        padding: 4px 6px;
+        white-space: nowrap;
+    }
+
+    .ww-btn {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
+
+    .sidebar-header {
+        font-size: 10px;
+        margin-bottom: 6px;
+    }
+
     /* Today's games single column */
     .today-games {
         grid-template-columns: 1fr;
