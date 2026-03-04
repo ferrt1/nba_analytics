@@ -37,11 +37,10 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     );
     const colors = values.map(v => (v >= threshold ? "#22c55e" : "#ef4444"));
 
-    // Dynamic bar sizing
-    const count = values.length;
-    const BAR_PERCENTAGE = count <= 5 ? 0.5 : count <= 10 ? 0.6 : 0.85;
-    const CATEGORY_PERCENTAGE = count <= 5 ? 0.5 : count <= 10 ? 0.6 : 0.85;
-    const MAX_BAR_THICKNESS = count <= 5 ? 28 : count <= 10 ? 36 : 48;
+    // Uniform bar sizing — always fill the space
+    const BAR_PERCENTAGE = 0.92;
+    const CATEGORY_PERCENTAGE = 0.92;
+    const MAX_BAR_THICKNESS = 120;
 
     const statLabels = {
         points: 'Pts', rebounds: 'Reb', assists: 'Ast', pra: 'PRA',
@@ -99,7 +98,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
         options: {
             animation: false,
             responsive: true,
-            layout: { padding: { top: 48, right: 10, left: 10, bottom: 12 } },
+            layout: { padding: { top: 10, right: 10, left: 10, bottom: 12 } },
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
@@ -126,10 +125,10 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     clip: false,
                     color: "#ffffff",
                     anchor: "end",
-                    align: "end",
+                    align: "start",
                     backgroundColor: "transparent",
                     borderRadius: 0,
-                    padding: { top: 4, bottom: 4, left: 0, right: 0 },
+                    padding: { top: 4, bottom: 0, left: 0, right: 0 },
                     font: function() {
                         const mobile = window.innerWidth <= 768;
                         const n = values.length;
@@ -137,14 +136,14 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                         if (mobile && n > 10) return { weight: "700", size: 9 };
                         if (mobile) return { weight: "700", size: 11 };
                         if (n > 20) return { weight: "700", size: 11 };
-                        return { weight: "700", size: 14 };
+                        return { weight: "700", size: 13 };
                     },
                     formatter: (value, context) => {
                         const original = _chartValues[context.dataIndex];
                         if (typeof original !== 'number' || isNaN(original)) return '';
                         return Number.isInteger(original) ? original : original.toFixed(1);
                     },
-                    offset: -8
+                    offset: 2
                 }
             },
             scales: {
