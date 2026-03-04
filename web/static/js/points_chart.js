@@ -37,10 +37,10 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     );
     const colors = values.map(v => (v >= threshold ? "#22c55e" : "#ef4444"));
 
-    // Uniform bar sizing — always fill the space
-    const BAR_PERCENTAGE = 0.92;
-    const CATEGORY_PERCENTAGE = 0.92;
-    const MAX_BAR_THICKNESS = 120;
+    // Uniform bar sizing — consistent width, capped so L5 doesn't stretch
+    const BAR_PERCENTAGE = 0.95;
+    const CATEGORY_PERCENTAGE = 0.95;
+    const MAX_BAR_THICKNESS = 42;
 
     const statLabels = {
         points: 'Pts', rebounds: 'Reb', assists: 'Ast', pra: 'PRA',
