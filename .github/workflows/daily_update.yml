@@ -23,6 +23,17 @@ jobs:
       - name: Create directories
         run: mkdir -p db data/raw data/raw/boxscores
 
+      - name: Download current DB from VPS
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 51.210.10.187 >> ~/.ssh/known_hosts 2>/dev/null
+          scp ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/db/nba.db db/nba.db
+          echo "DB downloaded ($(du -h db/nba.db | cut -f1))"
+
       - name: Connect to VPN
         env:
           WIREGUARD_CONF: ${{ secrets.WIREGUARD_CONF }}
@@ -39,21 +50,12 @@ jobs:
       - name: Load games into DB
         run: python scripts/db/load_games.py
 
-      - name: Fetch boxscores
+      - name: Fetch new boxscores only
         run: python scripts/fetch/fetch_boxscore.py
+        timeout-minutes: 15
 
       - name: Load stats into DB
         run: python scripts/db/load_stats.py
-
-      - name: Disconnect VPN
-        if: always()
-        run: sudo wg-quick down wg0 2>/dev/null || true
-
-      - name: Fetch odds
-        env:
-          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
-        run: python scripts/fetch/fetch_odds.py
-        continue-on-error: true
 
       - name: Save today games
         run: |
@@ -70,17 +72,21 @@ jobs:
           "
         continue-on-error: true
 
+      - name: Disconnect VPN
+        if: always()
+        run: sudo wg-quick down wg0 2>/dev/null || true
+
+      - name: Fetch odds
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python scripts/fetch/fetch_odds.py
+        continue-on-error: true
+
       - name: Upload to VPS
         env:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H 51.210.10.187 >> ~/.ssh/known_hosts 2>/dev/null
-
           scp db/nba.db ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/db/nba.db
           [ -f data/raw/today_games.json ] && scp data/raw/today_games.json ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/data/raw/today_games.json || true
           [ -f data/raw/odds_cache.json ] && scp data/raw/odds_cache.json ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/data/raw/odds_cache.json || true
-
           echo "Upload complete"
