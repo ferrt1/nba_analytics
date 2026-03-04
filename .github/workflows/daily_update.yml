@@ -1,0 +1,67 @@
+name: Daily NBA Update
+
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 10:00 AM Argentina (UTC-3)
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install nba_api requests python-dotenv pandas
+
+      - name: Fetch games
+        run: python scripts/fetch/fetch_games.py
+
+      - name: Load games into DB
+        run: python scripts/db/load_games.py
+
+      - name: Fetch boxscores
+        run: python scripts/fetch/fetch_boxscore.py
+
+      - name: Load stats into DB
+        run: python scripts/db/load_stats.py
+
+      - name: Fetch odds
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python scripts/fetch/fetch_odds.py
+
+      - name: Save today games
+        run: |
+          python -c "
+          import json, sys, os
+          sys.path.insert(0, '.')
+          from scripts.tools.nba_daily import get_today_games
+          from datetime import date
+          games = get_today_games()
+          os.makedirs('data/raw', exist_ok=True)
+          with open('data/raw/today_games.json', 'w') as f:
+              json.dump({'date': str(date.today()), 'games': games}, f)
+          print(f'{len(games)} games saved')
+          "
+
+      - name: Upload to VPS
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 51.210.10.187 >> ~/.ssh/known_hosts 2>/dev/null
+
+          scp db/nba.db ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/db/nba.db
+          scp data/raw/today_games.json ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/data/raw/today_games.json
+          [ -f data/raw/odds_cache.json ] && scp data/raw/odds_cache.json ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/data/raw/odds_cache.json || true
+
+          echo "Upload complete"
