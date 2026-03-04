@@ -50,6 +50,18 @@ jobs:
       - name: Load games into DB
         run: python scripts/db/load_games.py
 
+      - name: Mark existing boxscores from DB
+        run: |
+          python -c "
+          import sqlite3
+          conn = sqlite3.connect('db/nba.db')
+          ids = [r[0] for r in conn.execute('SELECT DISTINCT game_id FROM player_stats').fetchall()]
+          conn.close()
+          for gid in ids:
+              open(f'data/raw/boxscores/boxscore_{gid}.json', 'w').write('[]')
+          print(f'Marked {len(ids)} existing boxscores')
+          "
+
       - name: Fetch new boxscores only
         run: python scripts/fetch/fetch_boxscore.py
         timeout-minutes: 15
