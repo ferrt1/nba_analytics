@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies
         run: pip install nba_api requests python-dotenv pandas
 
+      - name: Create directories
+        run: mkdir -p db data/raw data/raw/boxscores
+
       - name: Fetch games
         run: python scripts/fetch/fetch_games.py
 
@@ -36,6 +39,7 @@ jobs:
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: python scripts/fetch/fetch_odds.py
+        continue-on-error: true
 
       - name: Save today games
         run: |
