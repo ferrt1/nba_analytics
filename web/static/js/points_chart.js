@@ -7,7 +7,7 @@ function updateChartLine(threshold) {
     if (!chart) return;
     const len = chart.data.labels.length;
     const colors = _chartValues.map(v =>
-        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#16a34a" : "#dc2626"
+        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#22c55e" : "#ef4444"
     );
     chart.data.datasets[2].data = Array(len).fill(threshold);
     chart.data.datasets[1].backgroundColor = colors;
@@ -35,7 +35,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     const mainValues = values.map(v =>
         typeof v === 'number' && !isNaN(v) ? Math.max(0, v - stubHeight) : v
     );
-    const colors = values.map(v => (v >= threshold ? "#16a34a" : "#dc2626"));
+    const colors = values.map(v => (v >= threshold ? "#22c55e" : "#ef4444"));
 
     // Fixed bar sizing — bars always the same width regardless of count
     const BAR_PERCENTAGE = 0.98;
@@ -120,7 +120,12 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                 },
                 datalabels: {
                     display: function(context) {
-                        return context.dataset.label === statLabel;
+                        if (context.dataset.label !== statLabel) return false;
+                        // On mobile with many bars, show every other label
+                        if (window.innerWidth <= 768 && values.length > 15) {
+                            return context.dataIndex % 2 === 0;
+                        }
+                        return true;
                     },
                     clip: false,
                     color: "#ffffff",
@@ -128,8 +133,15 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     align: "end",
                     backgroundColor: "transparent",
                     borderRadius: 0,
-                    padding: window.innerWidth <= 768 ? { top: 2, bottom: 2, left: 0, right: 0 } : { top: 6, bottom: 6, left: 0, right: 0 },
-                    font: { weight: "700", size: window.innerWidth <= 768 ? 9 : 14 },
+                    padding: window.innerWidth <= 768
+                        ? { top: 1, bottom: 1, left: 0, right: 0 }
+                        : { top: 6, bottom: 6, left: 0, right: 0 },
+                    font: function() {
+                        const mobile = window.innerWidth <= 768;
+                        if (mobile && values.length > 20) return { weight: "700", size: 8 };
+                        if (mobile) return { weight: "700", size: 10 };
+                        return { weight: "700", size: 14 };
+                    },
                     formatter: (value, context) => {
                         const original = _chartValues[context.dataIndex];
                         if (typeof original !== 'number' || isNaN(original)) return '';
