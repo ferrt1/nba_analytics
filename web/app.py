@@ -162,9 +162,9 @@ def player_stats_api():
         if row:
             player_team = row[0]
 
-        # check today's games (live from API) for opponent
+        # check today's games (cached) for opponent
+        today_games = get_today_games_cached()
         try:
-            today_games = get_today_games()
             if player_team and today_games:
                 for g in today_games:
                     if g.get("home_tricode") == player_team:
