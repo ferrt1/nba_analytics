@@ -12,7 +12,10 @@ DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'db', 'nba.db')
 
 import time
 import threading
-_games_cache = {"data": [], "ts": 0, "lock": threading.Lock(), "fetching": False}
+from datetime import date
+
+TODAY_GAMES_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw', 'today_games.json')
+_games_cache = {"data": [], "ts": 0, "fetching": False}
 
 def get_today_games_cached():
     now = time.time()
@@ -20,6 +23,16 @@ def get_today_games_cached():
         _games_cache["fetching"] = True
         def _fetch():
             try:
+                # First try loading from file (works on VPS where NBA API is blocked)
+                if os.path.exists(TODAY_GAMES_PATH):
+                    with open(TODAY_GAMES_PATH, 'r') as f:
+                        data = json.load(f)
+                    if data.get("date") == str(date.today()):
+                        _games_cache["data"] = data.get("games", [])
+                        _games_cache["ts"] = time.time()
+                        _games_cache["fetching"] = False
+                        return
+                # Fallback to NBA API (works on localhost)
                 _games_cache["data"] = get_today_games()
             except Exception:
                 _games_cache["data"] = []

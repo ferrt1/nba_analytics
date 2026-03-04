@@ -27,6 +27,73 @@ def run_command(cmd, description):
         print(f"❌ Error en {description}: {e}\n")
         return False
 
+def upload_db_to_vps():
+    """Sube la base de datos actualizada al VPS via SCP."""
+    VPS_HOST = "ubuntu@51.210.10.187"
+    VPS_DB_PATH = "/home/ubuntu/nba_analytics/db/nba.db"
+    local_db = PROJECT_DIR / "db" / "nba.db"
+
+    if not local_db.exists():
+        print("⚠️  No se encontró la DB local, saltando upload al VPS")
+        return
+
+    print(f"\n{'='*60}")
+    print(f"📤 Subiendo DB y odds al VPS...")
+    print(f"{'='*60}")
+
+    files_to_upload = [
+        (local_db, f"{VPS_HOST}:{VPS_DB_PATH}"),
+    ]
+    odds_file = PROJECT_DIR / "data" / "raw" / "odds_cache.json"
+    if odds_file.exists():
+        files_to_upload.append(
+            (odds_file, f"{VPS_HOST}:/home/ubuntu/nba_analytics/data/raw/odds_cache.json")
+        )
+    today_file = PROJECT_DIR / "data" / "raw" / "today_games.json"
+    if today_file.exists():
+        files_to_upload.append(
+            (today_file, f"{VPS_HOST}:/home/ubuntu/nba_analytics/data/raw/today_games.json")
+        )
+
+    for local_path, remote_path in files_to_upload:
+        try:
+            result = subprocess.run(
+                ["scp", str(local_path), remote_path],
+                timeout=120, capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                print(f"✅ {local_path.name} subido al VPS")
+            else:
+                print(f"⚠️  Error subiendo {local_path.name}: {result.stderr}")
+        except FileNotFoundError:
+            print("⚠️  SCP no encontrado. Instala OpenSSH o usa Git Bash.")
+            break
+        except subprocess.TimeoutExpired:
+            print(f"⚠️  Timeout subiendo {local_path.name}")
+        except Exception as e:
+            print(f"⚠️  Error: {e}")
+    print()
+
+
+def save_today_games():
+    """Guarda los partidos de hoy en un JSON para que el VPS pueda leerlos."""
+    print(f"\n{'='*60}")
+    print(f"📅 Guardando partidos de hoy...")
+    print(f"{'='*60}")
+    try:
+        sys.path.insert(0, str(PROJECT_DIR))
+        from scripts.tools.nba_daily import get_today_games
+        from datetime import date
+        games = get_today_games()
+        out_path = PROJECT_DIR / "data" / "raw" / "today_games.json"
+        import json
+        with open(out_path, 'w') as f:
+            json.dump({"date": str(date.today()), "games": games}, f)
+        print(f"✅ {len(games)} partidos guardados\n")
+    except Exception as e:
+        print(f"⚠️  Error guardando partidos de hoy: {e}\n")
+
+
 def cleanup_old_game_files():
     """Elimina archivos de games de temporadas anteriores y snapshots diarios viejos."""
     data_dir = PROJECT_DIR / "data" / "raw"
@@ -80,6 +147,12 @@ def main():
     print("🎰 Actualizando props de casinos...")
     if not run_command(f"{sys.executable} scripts/fetch/fetch_odds.py", "Descarga de props (The Odds API)"):
         print("⚠️  Continuando sin actualizar props...")
+
+    # Paso 7: Guardar partidos de hoy para el VPS
+    save_today_games()
+
+    # Subir DB actualizada al VPS
+    upload_db_to_vps()
 
     # Iniciar servidor Flask
     print("🚀 Iniciando servidor en http://localhost:5000")
