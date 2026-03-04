@@ -8,8 +8,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.tools.nba_daily import get_today_games
 
 app = Flask(__name__)
-DB_PATH = "db/nba.db"
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'db', 'nba.db')
 
+import time
+_games_cache = {"data": None, "ts": 0}
+
+def get_today_games_cached():
+    now = time.time()
+    if _games_cache["data"] is None or now - _games_cache["ts"] > 1800:
+        try:
+            _games_cache["data"] = get_today_games()
+        except Exception:
+            _games_cache["data"] = []
+        _games_cache["ts"] = now
+    return _games_cache["data"]
 
 
 def get_db():
@@ -20,10 +32,7 @@ def get_db():
 
 @app.route("/")
 def index():
-    try:
-        today_games = get_today_games()
-    except Exception:
-        today_games = []
+    today_games = get_today_games_cached()
     return render_template(
         "index.html",
         today_games=today_games
@@ -85,10 +94,7 @@ def player():
 
     conn.close()
 
-    try:
-        today_games = get_today_games()
-    except Exception:
-        today_games = []
+    today_games = get_today_games_cached()
     return render_template(
         "index.html",
         player=row["player_name"],
