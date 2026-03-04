@@ -11,16 +11,21 @@ app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'db', 'nba.db')
 
 import time
-_games_cache = {"data": None, "ts": 0}
+import threading
+_games_cache = {"data": [], "ts": 0, "lock": threading.Lock(), "fetching": False}
 
 def get_today_games_cached():
     now = time.time()
-    if _games_cache["data"] is None or now - _games_cache["ts"] > 1800:
-        try:
-            _games_cache["data"] = get_today_games()
-        except Exception:
-            _games_cache["data"] = []
-        _games_cache["ts"] = now
+    if now - _games_cache["ts"] > 1800 and not _games_cache["fetching"]:
+        _games_cache["fetching"] = True
+        def _fetch():
+            try:
+                _games_cache["data"] = get_today_games()
+            except Exception:
+                _games_cache["data"] = []
+            _games_cache["ts"] = time.time()
+            _games_cache["fetching"] = False
+        threading.Thread(target=_fetch, daemon=True).start()
     return _games_cache["data"]
 
 
