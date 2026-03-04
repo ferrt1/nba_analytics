@@ -6,7 +6,24 @@
       "Bash(.venv/Scripts/python -c \"import dotenv; print\\(''ok''\\)\")",
       "Bash(grep -i \"all.star\\\\|asg\" c:/Users/Fer/Desktop/nba-analytics/data/raw/games_*.json)",
       "Bash(python3:*)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Read(//c/Users/Fer/.ssh/**)",
+      "Read(//c/Users/Fer/Desktop/nba-analytics/$USERPROFILE/**)",
+      "Read(//c/Users/Fer/Desktop/nba-analytics/$USERPROFILE/.ssh/**)",
+      "Bash(ssh -o StrictHostKeyChecking=accept-new ubuntu@51.210.10.187 'echo \"\"conexion OK\"\" && uname -a')",
+      "Bash(ssh ubuntu@51.210.10.187 'which nginx && which python3 && nginx -v 2>&1 && python3 --version')",
+      "Bash(ssh ubuntu@51.210.10.187 'python3 --version 2>/dev/null; which nginx 2>/dev/null; which git 2>/dev/null; ls ~/agusbob/ 2>/dev/null')",
+      "Bash(ssh ubuntu@51.210.10.187 'sudo apt install -y nginx python3-venv python3-pip 2>&1 | tail -5')",
+      "Bash(ssh ubuntu@51.210.10.187 'cd ~ && git clone https://github.com/ferrt1/nba_analytics.git 2>&1 && cd nba_analytics && python3 -m venv venv && source venv/bin/activate && pip install flask gunicorn nba_api requests python-dotenv 2>&1 | tail -5')",
+      "Bash(ssh ubuntu@51.210.10.187 'echo \"\"ODDS_API_KEY=0936b1acfe33acdca6a2f202fa56ffd0\"\" > ~/nba_analytics/.env && chmod 600 ~/nba_analytics/.env && echo \"\"OK\"\"')",
+      "Bash(ssh ubuntu@51.210.10.187:*)",
+      "Bash(scp /c/Users/Fer/Desktop/nba-analytics/db/nba.db ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/db/nba.db)",
+      "Read(//home/ubuntu/**)",
+      "Bash(gh auth status)",
+      "Read(//c//**)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }

@@ -901,8 +901,153 @@ td { font-size: 13px; }
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
+    body {
+        padding: 10px 12px;
+    }
+
+    h1 { font-size: 16px; }
+
+    .search-form {
+        display: flex;
+        gap: 6px;
+    }
+
+    .search-form input {
+        margin-right: 0;
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Stats + controls stack vertically */
+    .stats-and-controls-row {
+        flex-direction: column;
+    }
+
+    .range-controls {
+        justify-content: center;
+    }
+
+    /* Quick stats scroll horizontally */
+    .quick-stats {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .quick-stat {
+        min-width: 52px;
+    }
+
+    /* Chart shorter on mobile */
+    .chart-container canvas {
+        height: 200px !important;
+    }
+
+    /* Stat buttons smaller */
+    .stat-buttons-row button {
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+
+    /* Props header stacks */
+    .props-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .props-stat-tabs {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+
+    .props-stat-tabs button {
+        flex-shrink: 0;
+    }
+
+    /* Props table: first column sticky */
+    .props-table {
+        font-size: 11px;
+    }
+
+    .props-table thead th,
+    .props-table td {
+        padding: 6px 6px;
+    }
+
+    .player-cell {
+        min-width: 120px;
+    }
+
+    /* Today's games single column */
     .today-games {
         grid-template-columns: 1fr;
+    }
+
+    /* Player header stack on very small */
+    .player-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .player-stats-top {
+        align-items: flex-start;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    /* Line controls wrap nicely */
+    .line-controls {
+        font-size: 12px;
+        gap: 6px;
+    }
+
+    /* Win rate items smaller */
+    .win-rate-item {
+        padding: 4px 6px;
+        min-width: 40px;
+    }
+
+    .win-rate-label { font-size: 9px; }
+    .win-rate-value { font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    .main-card {
+        padding: 10px;
+    }
+
+    .range-controls button {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .stat-buttons-row {
+        gap: 3px;
+    }
+
+    .stat-buttons-row button {
+        padding: 4px 6px;
+        font-size: 9px;
+    }
+
+    .props-card {
+        padding: 8px 10px;
+    }
+
+    .today-games li {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .team-logo {
+        width: 18px;
+        height: 18px;
     }
 }
