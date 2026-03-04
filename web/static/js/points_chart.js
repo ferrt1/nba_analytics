@@ -7,7 +7,7 @@ function updateChartLine(threshold) {
     if (!chart) return;
     const len = chart.data.labels.length;
     const colors = _chartValues.map(v =>
-        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#22c55e" : "#ef4444"
+        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#16a34a" : "#dc2626"
     );
     chart.data.datasets[2].data = Array(len).fill(threshold);
     chart.data.datasets[1].backgroundColor = colors;
@@ -35,7 +35,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     const mainValues = values.map(v =>
         typeof v === 'number' && !isNaN(v) ? Math.max(0, v - stubHeight) : v
     );
-    const colors = values.map(v => (v >= threshold ? "#22c55e" : "#ef4444"));
+    const colors = values.map(v => (v >= threshold ? "#16a34a" : "#dc2626"));
 
     // Fixed bar thickness — same pixel width always, gaps stay minimal
     const chartWidth = ctx.parentElement ? ctx.parentElement.offsetWidth : 800;

@@ -6,8 +6,8 @@
     --muted-light: #8b9bb0;
     --accent: #4a9eff;
     --accent-glow: rgba(74, 158, 255, 0.12);
-    --good: #22c55e;
-    --bad: #ef4444;
+    --good: #16a34a;
+    --bad: #dc2626;
     --border: #1e2736;
     --border-light: #2a3548;
     --text: #d1d9e6;
@@ -176,13 +176,10 @@ h2, h3 {
     width: 150px;
     flex-shrink: 0;
     padding: 0 12px 0 0;
-    max-height: none;
     overflow-y: auto;
     border-right: 1px solid var(--border);
     margin-right: 16px;
-    align-self: flex-start;
-    position: sticky;
-    top: 12px;
+    align-self: stretch;
 }
 
 .sidebar-header {
@@ -211,7 +208,7 @@ h2, h3 {
     border-left: 2px solid transparent;
     font-size: 13px;
     font-weight: 400;
-    color: var(--muted-light);
+    color: var(--text);
     transition: color 0.15s, border-color 0.15s;
     margin-bottom: 2px;
 }
