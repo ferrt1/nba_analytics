@@ -173,13 +173,16 @@ h2, h3 {
 
 /* ── Sidebar ───────────────────────────── */
 .team-sidebar {
-    width: 160px;
+    width: 150px;
     flex-shrink: 0;
-    padding: 0 14px 0 0;
-    max-height: 500px;
+    padding: 0 12px 0 0;
+    max-height: none;
     overflow-y: auto;
     border-right: 1px solid var(--border);
-    margin-right: 18px;
+    margin-right: 16px;
+    align-self: flex-start;
+    position: sticky;
+    top: 12px;
 }
 
 .sidebar-header {
@@ -302,49 +305,48 @@ h2, h3 {
 
 /* ── Main player card ──────────────────── */
 .main-card {
-    padding: 20px;
+    padding: 16px 18px;
 }
 
 .player-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 16px;
-    padding-bottom: 14px;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
 }
 
 .player-info h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
     color: #fff;
     font-weight: 800;
     letter-spacing: -0.3px;
 }
 
 .player-position {
-    margin: 5px 0 0 0;
+    margin: 3px 0 0 0;
     color: var(--muted);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
 .player-stats-top {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
+    align-items: baseline;
+    gap: 6px;
 }
 
 .stat-value {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 800;
     color: #fff;
     line-height: 1;
 }
 
 .stat-label {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
     font-weight: 700;
     text-transform: uppercase;
@@ -354,9 +356,9 @@ h2, h3 {
 /* ── Stats + controls row ──────────────── */
 .stats-and-controls-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: stretch;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     width: 100%;
 }
 
@@ -376,9 +378,9 @@ h2, h3 {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 2px;
     flex: 1;
-    padding: 10px 6px;
+    padding: 6px 4px;
     border-right: 1px solid var(--border);
 }
 
@@ -396,7 +398,7 @@ h2, h3 {
 }
 
 .qs-value {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--text-bright);
 }
@@ -440,28 +442,28 @@ h2, h3 {
 
 /* ── Chart section ─────────────────────── */
 .chart-section {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
 }
 
 .chart-container {
     max-width: 100%;
-    margin: 8px 0 0 0;
+    margin: 4px 0 0 0;
     background: transparent;
-    padding: 4px 4px 0 4px;
+    padding: 0 4px;
     overflow: visible;
 }
 
 .chart-container canvas {
-    height: 230px !important;
+    height: 220px !important;
 }
 
 /* ── Line controls ─────────────────────── */
 .line-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 15px;
-    padding: 8px 0;
+    gap: 10px;
+    font-size: 14px;
+    padding: 4px 0;
     flex-wrap: wrap;
 }
 
@@ -488,30 +490,30 @@ h2, h3 {
 /* ── Win rate indicators ───────────────── */
 .win-rate-indicators {
     display: flex;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px;
+    margin-top: 6px;
     flex-wrap: wrap;
-    padding: 12px 0;
+    padding: 8px 0;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .win-rate-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    padding: 6px 12px;
-    border-radius: 6px;
+    gap: 2px;
+    padding: 4px 10px;
+    border-radius: 5px;
     background: var(--panel-2);
     border: 1px solid var(--border);
-    min-width: 52px;
+    min-width: 46px;
     text-align: center;
 }
 
 .win-rate-label {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--muted);
     font-weight: 700;
     text-transform: uppercase;
@@ -519,7 +521,7 @@ h2, h3 {
 }
 
 .win-rate-value {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
 }
 
@@ -626,10 +628,10 @@ h2, h3 {
 /* ── Stat buttons row ──────────────────── */
 .stat-buttons-row {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     flex-wrap: wrap;
-    margin-top: 14px;
-    padding-top: 12px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid var(--border);
 }
 
@@ -637,7 +639,7 @@ h2, h3 {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted-light);
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 13px;
