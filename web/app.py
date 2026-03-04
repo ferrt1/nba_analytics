@@ -62,10 +62,7 @@ def player():
     
 
     if not row:
-        try:
-            today_games = get_today_games()
-        except Exception:
-            today_games = []
+        today_games = get_today_games_cached()
         return render_template(
             "index.html",
             error="Jugador no encontrado",
