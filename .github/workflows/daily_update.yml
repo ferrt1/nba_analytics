@@ -23,6 +23,16 @@ jobs:
       - name: Create directories
         run: mkdir -p db data/raw data/raw/boxscores
 
+      - name: Connect to VPN
+        env:
+          WIREGUARD_CONF: ${{ secrets.WIREGUARD_CONF }}
+        run: |
+          sudo apt-get install -y wireguard-tools > /dev/null 2>&1
+          echo "$WIREGUARD_CONF" | sudo tee /etc/wireguard/wg0.conf > /dev/null
+          sudo chmod 600 /etc/wireguard/wg0.conf
+          sudo wg-quick up wg0
+          echo "VPN connected, IP: $(curl -s ifconfig.me)"
+
       - name: Fetch games
         run: python scripts/fetch/fetch_games.py
 
@@ -34,6 +44,10 @@ jobs:
 
       - name: Load stats into DB
         run: python scripts/db/load_stats.py
+
+      - name: Disconnect VPN
+        if: always()
+        run: sudo wg-quick down wg0 2>/dev/null || true
 
       - name: Fetch odds
         env:
@@ -54,6 +68,7 @@ jobs:
               json.dump({'date': str(date.today()), 'games': games}, f)
           print(f'{len(games)} games saved')
           "
+        continue-on-error: true
 
       - name: Upload to VPS
         env:
@@ -65,7 +80,7 @@ jobs:
           ssh-keyscan -H 51.210.10.187 >> ~/.ssh/known_hosts 2>/dev/null
 
           scp db/nba.db ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/db/nba.db
-          scp data/raw/today_games.json ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/data/raw/today_games.json
+          [ -f data/raw/today_games.json ] && scp data/raw/today_games.json ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/data/raw/today_games.json || true
           [ -f data/raw/odds_cache.json ] && scp data/raw/odds_cache.json ubuntu@51.210.10.187:/home/ubuntu/nba_analytics/data/raw/odds_cache.json || true
 
           echo "Upload complete"
