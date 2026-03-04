@@ -37,10 +37,10 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     );
     const colors = values.map(v => (v >= threshold ? "#22c55e" : "#ef4444"));
 
-    // Uniform bar sizing — consistent width, capped so L5 doesn't stretch
-    const BAR_PERCENTAGE = 0.95;
-    const CATEGORY_PERCENTAGE = 0.95;
-    const MAX_BAR_THICKNESS = 42;
+    // Fixed bar thickness — same pixel width always, gaps stay minimal
+    const chartWidth = ctx.parentElement ? ctx.parentElement.offsetWidth : 800;
+    const idealBarWidth = Math.floor((chartWidth - 60) / Math.max(values.length, 1)) - 4;
+    const barThickness = Math.max(12, Math.min(idealBarWidth, 42));
 
     const statLabels = {
         points: 'Pts', rebounds: 'Reb', assists: 'Ast', pra: 'PRA',
@@ -51,9 +51,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     const statLabel = statLabels[stat] || 'Val';
 
     const sharedBarOpts = {
-        barPercentage: BAR_PERCENTAGE,
-        categoryPercentage: CATEGORY_PERCENTAGE,
-        maxBarThickness: MAX_BAR_THICKNESS,
+        barThickness: barThickness,
         stack: 'g'
     };
 
