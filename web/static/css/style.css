@@ -204,12 +204,24 @@ body > *:not(.navbar) {
 .card h3 { margin: 0 0 10px 0; color: var(--accent); }
 .card h2 { margin: 0 0 16px 0; font-size: 24px; color: #fff; font-weight: 800; }
 
-/* ── Player container ──────────────────── */
-.player-container {
+/* ── Page layout (sidebar + main) ──────── */
+.page-layout {
     display: flex;
     gap: 24px;
     width: 100%;
-    margin-bottom: 24px;
+}
+
+.page-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.page-main > .props-card,
+.page-main > .games_today-card {
+    margin-bottom: 0;
 }
 
 /* ── Sidebar ───────────────────────────── */
@@ -347,6 +359,7 @@ body > *:not(.navbar) {
     font-weight: 600;
 }
 
+/* Legacy — kept for compatibility */
 .player-main-content {
     flex: 1;
     min-width: 0;
@@ -480,6 +493,11 @@ body > *:not(.navbar) {
     color: #fff;
     font-weight: 700;
     box-shadow: 0 2px 8px rgba(74, 142, 255, 0.25);
+}
+
+/* ── Chart card ────────────────────────── */
+.chart-card {
+    padding: 20px;
 }
 
 /* ── Chart section ─────────────────────── */
@@ -623,9 +641,6 @@ body > *:not(.navbar) {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
 }
 
 .stat-buttons-row button {
@@ -970,7 +985,7 @@ h2, h3 { color: var(--accent); }
     .today-games {
         grid-template-columns: repeat(2, 1fr);
     }
-    .player-container {
+    .page-layout {
         flex-direction: column;
         gap: 16px;
     }
