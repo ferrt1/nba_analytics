@@ -3,20 +3,20 @@
    ══════════════════════════════════════════ */
 
 :root {
-    --bg-1: #0f1117;
-    --panel: #1a1f2e;
-    --panel-2: #252b3b;
+    --bg-1: #0c0e14;
+    --panel: #151921;
+    --panel-2: #1e2330;
     --muted: #7a7f8c;
     --muted-light: #9ca3af;
     --accent: #4a8eff;
     --accent-glow: rgba(74, 142, 255, 0.15);
-    --good: #2dd881;
-    --good-bright: #4ae89a;
-    --bad: #d44a4a;
-    --border: #303849;
-    --border-light: #3a4258;
-    --text: #ebedf2;
-    --text-bright: #f5f6f8;
+    --good: #22c55e;
+    --good-bright: #34d399;
+    --bad: #dc2626;
+    --border: #252d3d;
+    --border-light: #303849;
+    --text: #e2e4e9;
+    --text-bright: #f0f1f4;
     --radius: 16px;
     --radius-sm: 12px;
     --radius-xs: 8px;
@@ -55,7 +55,7 @@ body > *:not(.navbar) {
     z-index: 50;
     width: 100%;
     border-bottom: 1px solid var(--border);
-    background: rgba(15, 17, 23, 0.8);
+    background: rgba(12, 14, 20, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -85,7 +85,8 @@ body > *:not(.navbar) {
     height: 32px;
     width: 32px;
     border-radius: var(--radius-xs);
-    background: var(--good);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -232,7 +233,7 @@ body > *:not(.navbar) {
     border-radius: var(--radius);
     border: 1px solid var(--border);
     padding: 16px;
-    align-self: stretch;
+    align-self: flex-start;
     overflow-y: auto;
     max-height: calc(100vh - 6rem);
     position: sticky;
@@ -309,22 +310,22 @@ body > *:not(.navbar) {
 }
 
 .ww-btn.ww-with.active {
-    background: rgba(45, 216, 129, 0.15);
+    background: rgba(34, 197, 94, 0.15);
     color: var(--good);
 }
 
 .ww-btn.ww-without.active {
-    background: rgba(212, 74, 74, 0.15);
+    background: rgba(220, 38, 38, 0.15);
     color: var(--bad);
 }
 
 .ww-btn.ww-with:hover {
-    background: rgba(45, 216, 129, 0.2);
+    background: rgba(34, 197, 94, 0.2);
     color: var(--good);
 }
 
 .ww-btn.ww-without:hover {
-    background: rgba(212, 74, 74, 0.2);
+    background: rgba(220, 38, 38, 0.2);
     color: var(--bad);
 }
 
@@ -337,13 +338,13 @@ body > *:not(.navbar) {
 }
 
 .filter-badge.filter-with {
-    background: rgba(45, 216, 129, 0.1);
+    background: rgba(34, 197, 94, 0.1);
     border: 1px solid var(--good);
     color: var(--good);
 }
 
 .filter-badge.filter-without {
-    background: rgba(212, 74, 74, 0.1);
+    background: rgba(220, 38, 38, 0.1);
     border: 1px solid var(--bad);
     color: var(--bad);
 }
@@ -354,7 +355,7 @@ body > *:not(.navbar) {
 }
 
 .team-player-item.active {
-    background: rgba(45, 216, 129, 0.12);
+    background: rgba(34, 197, 94, 0.12);
     color: var(--good);
     font-weight: 600;
 }
@@ -440,7 +441,7 @@ body > *:not(.navbar) {
     padding: 10px 8px;
     background: var(--panel-2);
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(48, 56, 73, 0.5);
+    border: 1px solid rgba(37, 45, 61, 0.5);
 }
 
 .qs-label {
@@ -464,7 +465,7 @@ body > *:not(.navbar) {
     gap: 4px;
     padding: 8px;
     background: var(--panel-2);
-    border: 1px solid rgba(48, 56, 73, 0.5);
+    border: 1px solid rgba(37, 45, 61, 0.5);
     border-radius: var(--radius-sm);
     flex-shrink: 0;
     align-items: center;
@@ -586,8 +587,8 @@ body > *:not(.navbar) {
 
 /* Dynamic win-rate colors */
 .win-rate-item.wr-good {
-    background: rgba(45, 216, 129, 0.12);
-    border-color: rgba(45, 216, 129, 0.3);
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.3);
 }
 
 .win-rate-item.wr-good .win-rate-value,
@@ -608,8 +609,8 @@ body > *:not(.navbar) {
 }
 
 .win-rate-item.wr-bad {
-    background: rgba(212, 74, 74, 0.12);
-    border-color: rgba(212, 74, 74, 0.3);
+    background: rgba(220, 38, 38, 0.12);
+    border-color: rgba(220, 38, 38, 0.3);
 }
 
 .win-rate-item.wr-bad .win-rate-value,
@@ -645,7 +646,7 @@ body > *:not(.navbar) {
 
 .stat-buttons-row button {
     background: var(--panel-2);
-    border: 1px solid rgba(48, 56, 73, 0.5);
+    border: 1px solid rgba(37, 45, 61, 0.5);
     color: var(--muted);
     padding: 6px 12px;
     border-radius: var(--radius-xs);
@@ -667,7 +668,7 @@ body > *:not(.navbar) {
     color: var(--bg-1);
     font-weight: 700;
     border-color: var(--good);
-    box-shadow: 0 2px 10px rgba(45, 216, 129, 0.25);
+    box-shadow: 0 2px 10px rgba(34, 197, 94, 0.25);
 }
 
 /* ── Props table ────────────────────────── */
@@ -708,7 +709,7 @@ body > *:not(.navbar) {
     appearance: none;
     -webkit-appearance: none;
     background: var(--panel-2);
-    border: 1px solid rgba(48, 56, 73, 0.5);
+    border: 1px solid rgba(37, 45, 61, 0.5);
     color: var(--text);
     padding: 8px 32px 8px 14px;
     border-radius: var(--radius-sm);
@@ -735,7 +736,7 @@ body > *:not(.navbar) {
 
 .props-stat-tabs button {
     background: var(--panel-2);
-    border: 1px solid rgba(48, 56, 73, 0.5);
+    border: 1px solid rgba(37, 45, 61, 0.5);
     color: var(--muted);
     padding: 6px 12px;
     border-radius: var(--radius-xs);
@@ -757,7 +758,7 @@ body > *:not(.navbar) {
     color: var(--bg-1);
     border-color: var(--good);
     font-weight: 700;
-    box-shadow: 0 2px 10px rgba(45, 216, 129, 0.25);
+    box-shadow: 0 2px 10px rgba(34, 197, 94, 0.25);
 }
 
 #props-table-wrap {
@@ -792,12 +793,12 @@ body > *:not(.navbar) {
 
 .props-table tbody tr.props-row {
     cursor: pointer;
-    border-bottom: 1px solid rgba(48, 56, 73, 0.4);
+    border-bottom: 1px solid rgba(37, 45, 61, 0.4);
     transition: background 0.1s;
 }
 
 .props-table tbody tr.props-row:hover {
-    background: rgba(37, 43, 59, 0.5);
+    background: rgba(30, 35, 48, 0.5);
 }
 
 .props-table td {
@@ -861,11 +862,11 @@ body > *:not(.navbar) {
     text-align: center;
 }
 
-.pct-pill.heat-5 { background: rgba(45, 216, 129, 0.7); color: var(--bg-1); }
-.pct-pill.heat-4 { background: rgba(45, 216, 129, 0.35); color: var(--text); }
+.pct-pill.heat-5 { background: rgba(34, 197, 94, 0.5); color: #fff; }
+.pct-pill.heat-4 { background: rgba(34, 197, 94, 0.22); color: var(--text); }
 .pct-pill.heat-3 { background: var(--panel-2); color: var(--text); }
-.pct-pill.heat-2 { background: rgba(212, 74, 74, 0.35); color: var(--text); }
-.pct-pill.heat-1 { background: rgba(212, 74, 74, 0.65); color: var(--text-bright); }
+.pct-pill.heat-2 { background: rgba(220, 38, 38, 0.22); color: var(--text); }
+.pct-pill.heat-1 { background: rgba(220, 38, 38, 0.45); color: #fff; }
 .pct-pill.heat-0 { background: var(--panel-2); color: var(--muted); }
 
 /* ── Today's games ─────────────────────── */
@@ -900,7 +901,7 @@ body > *:not(.navbar) {
 .today-games li {
     padding: 14px 16px;
     background: var(--panel-2);
-    border: 1px solid rgba(48, 56, 73, 0.5);
+    border: 1px solid rgba(37, 45, 61, 0.5);
     border-radius: var(--radius-sm);
     font-size: 13px;
     display: grid;
@@ -912,8 +913,8 @@ body > *:not(.navbar) {
 }
 
 .today-games li:hover {
-    border-color: rgba(45, 216, 129, 0.3);
-    box-shadow: 0 4px 16px rgba(45, 216, 129, 0.05);
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.05);
 }
 
 .today-games li .away-team { text-align: left; }

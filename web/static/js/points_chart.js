@@ -7,7 +7,7 @@ function updateChartLine(threshold) {
     if (!chart) return;
     const len = chart.data.labels.length;
     const colors = _chartValues.map(v =>
-        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#2dd881" : "#d44a4a"
+        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#22c55e" : "#dc2626"
     );
     chart.data.datasets[2].data = Array(len).fill(threshold);
     chart.data.datasets[1].backgroundColor = colors;
@@ -35,7 +35,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     const mainValues = values.map(v =>
         typeof v === 'number' && !isNaN(v) ? Math.max(0, v - stubHeight) : v
     );
-    const colors = values.map(v => (v >= threshold ? "#2dd881" : "#d44a4a"));
+    const colors = values.map(v => (v >= threshold ? "#22c55e" : "#dc2626"));
 
     // Fixed bar thickness — same pixel width always, gaps stay minimal
     const chartWidth = ctx.parentElement ? ctx.parentElement.offsetWidth : 800;
@@ -84,7 +84,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     type: 'line',
                     label: 'Linea',
                     data: thresholdLine,
-                    borderColor: 'rgba(74, 232, 154, 0.6)',
+                    borderColor: 'rgba(34, 197, 94, 0.5)',
                     borderWidth: 1.5,
                     borderDash: [6, 4],
                     fill: false,
@@ -102,12 +102,12 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(26, 31, 46, 0.95)',
-                    borderColor: 'rgba(48, 56, 73, 0.8)',
+                    backgroundColor: 'rgba(21, 25, 33, 0.95)',
+                    borderColor: 'rgba(37, 45, 61, 0.8)',
                     borderWidth: 1,
                     cornerRadius: 12,
-                    titleColor: '#ebedf2',
-                    bodyColor: '#ebedf2',
+                    titleColor: '#e2e4e9',
+                    bodyColor: '#e2e4e9',
                     padding: 10,
                     filter: item => item.dataset.label !== '_base',
                     callbacks: {
