@@ -130,12 +130,13 @@
         Object.keys(winRates).forEach(range => {
             const data = winRates[range];
             const rangeLabel = range === 'h2h' ? 'H2H' : `L${range}`;
+            const colorClass = data.percentage >= 75 ? 'wr-good' : data.percentage >= 60 ? 'wr-mid' : 'wr-bad';
             const item = document.createElement('div');
-            item.className = 'win-rate-item';
+            item.className = `win-rate-item ${colorClass}`;
             item.innerHTML = `
                 <div class="win-rate-label">${rangeLabel}</div>
-                <div class="win-rate-value ${data.percentage >= 70 ? 'good' : 'bad'}">${data.percentage}%</div>
-                <div style="font-size: 9px; color: var(--muted); margin-top: 2px;">${data.wins}/${data.total}</div>
+                <div class="win-rate-value">${data.percentage}%</div>
+                <div class="win-rate-detail">${data.wins}/${data.total}</div>
             `;
             winRateIndicatorsEl.appendChild(item);
         });

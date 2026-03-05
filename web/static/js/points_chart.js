@@ -7,7 +7,7 @@ function updateChartLine(threshold) {
     if (!chart) return;
     const len = chart.data.labels.length;
     const colors = _chartValues.map(v =>
-        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#16a34a" : "#dc2626"
+        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#2dd881" : "#d44a4a"
     );
     chart.data.datasets[2].data = Array(len).fill(threshold);
     chart.data.datasets[1].backgroundColor = colors;
@@ -35,7 +35,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     const mainValues = values.map(v =>
         typeof v === 'number' && !isNaN(v) ? Math.max(0, v - stubHeight) : v
     );
-    const colors = values.map(v => (v >= threshold ? "#16a34a" : "#dc2626"));
+    const colors = values.map(v => (v >= threshold ? "#2dd881" : "#d44a4a"));
 
     // Fixed bar thickness — same pixel width always, gaps stay minimal
     const chartWidth = ctx.parentElement ? ctx.parentElement.offsetWidth : 800;
@@ -70,12 +70,13 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     ...sharedBarOpts
                 },
                 {
-                    // Main colored bars — no rounding at all
+                    // Main colored bars
                     type: 'bar',
                     label: statLabel,
                     data: mainValues,
                     backgroundColor: colors,
-                    borderRadius: 0,
+                    borderRadius: { topLeft: 6, topRight: 6 },
+                    borderSkipped: 'bottom',
                     ...sharedBarOpts
                 },
                 {
@@ -83,7 +84,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     type: 'line',
                     label: 'Linea',
                     data: thresholdLine,
-                    borderColor: 'rgba(255,255,255,0.65)',
+                    borderColor: 'rgba(74, 232, 154, 0.6)',
                     borderWidth: 1.5,
                     borderDash: [6, 4],
                     fill: false,
@@ -101,6 +102,13 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
+                    backgroundColor: 'rgba(26, 31, 46, 0.95)',
+                    borderColor: 'rgba(48, 56, 73, 0.8)',
+                    borderWidth: 1,
+                    cornerRadius: 12,
+                    titleColor: '#ebedf2',
+                    bodyColor: '#ebedf2',
+                    padding: 10,
                     filter: item => item.dataset.label !== '_base',
                     callbacks: {
                         title: function(items) {

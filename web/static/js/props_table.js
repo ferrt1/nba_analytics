@@ -45,9 +45,9 @@
 
     // ── Helpers ──────────────────────────────────────────────────
     function pctCell(val) {
-        if (val === null || val === undefined) return '<td class="pct-cell muted">—</td>';
-        const cls = val >= 70 ? 'pct-good' : val <= 40 ? 'pct-bad' : 'pct-mid';
-        return `<td class="pct-cell ${cls}">${val}%</td>`;
+        if (val === null || val === undefined) return '<td class="pct-cell"><span class="pct-pill heat-0">\u2014</span></td>';
+        const heat = val >= 75 ? 'heat-5' : val >= 60 ? 'heat-4' : val >= 50 ? 'heat-3' : val >= 30 ? 'heat-2' : 'heat-1';
+        return `<td class="pct-cell"><span class="pct-pill ${heat}">${val}%</span></td>`;
     }
 
     function toDecimal(american) {

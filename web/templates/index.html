@@ -5,11 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NBA Analytics</title>
     <link rel="icon" type="image/svg+xml" href="https://cdn.nba.com/logos/leagues/logo-nba.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-<h1><a href="/" class="logo-link"><img src="https://cdn.nba.com/logos/leagues/logo-nba.svg" alt="NBA" class="logo-icon">NBA Analytics</a></h1>
+<header class="navbar">
+    <div class="navbar-inner">
+        <a href="/" class="navbar-brand">
+            <div class="brand-icon">
+                <img src="https://cdn.nba.com/logos/leagues/logo-nba.svg" alt="NBA">
+            </div>
+            <span>NBA Analytics</span>
+        </a>
+    </div>
+</header>
 
 <form action="/player" class="search-form">
     <div class="search-input-wrap">
