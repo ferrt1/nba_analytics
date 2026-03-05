@@ -2,12 +2,16 @@ let chart;
 let _chartValues = [];
 let _chartStubHeight = 0;
 
+// Darker greens/reds for better white text contrast
+const BAR_GREEN = "#15803d";
+const BAR_RED = "#b91c1c";
+
 // Update only the threshold line and bar colors — no chart recreation, no animation
 function updateChartLine(threshold) {
     if (!chart) return;
     const len = chart.data.labels.length;
     const colors = _chartValues.map(v =>
-        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? "#22c55e" : "#dc2626"
+        (typeof v === 'number' && !isNaN(v) && v >= threshold) ? BAR_GREEN : BAR_RED
     );
     chart.data.datasets[2].data = Array(len).fill(threshold);
     chart.data.datasets[1].backgroundColor = colors;
@@ -35,7 +39,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
     const mainValues = values.map(v =>
         typeof v === 'number' && !isNaN(v) ? Math.max(0, v - stubHeight) : v
     );
-    const colors = values.map(v => (v >= threshold ? "#22c55e" : "#dc2626"));
+    const colors = values.map(v => (v >= threshold ? BAR_GREEN : BAR_RED));
 
     // Fixed bar thickness — same pixel width always, gaps stay minimal
     const chartWidth = ctx.parentElement ? ctx.parentElement.offsetWidth : 800;
@@ -55,6 +59,14 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
         stack: 'g'
     };
 
+    // Responsive x-axis: hide labels when too many bars for the width
+    const n = values.length;
+    const isMobile = window.innerWidth <= 768;
+    const tooMany = (isMobile && n > 15) || (!isMobile && n > 25);
+    const xTickOpts = tooMany
+        ? { padding: 4, color: 'rgba(255,255,255,0.45)', maxRotation: 90, minRotation: 45, font: { size: 9 }, autoSkip: true, maxTicksLimit: isMobile ? 10 : 20 }
+        : { padding: 8, color: 'rgba(255,255,255,0.5)', maxRotation: 45, minRotation: 0, autoSkip: false };
+
     chart = new Chart(ctx, {
         type: "bar",
         data: {
@@ -65,7 +77,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     type: 'bar',
                     label: '_base',
                     data: values.map(v => typeof v === 'number' && !isNaN(v) ? stubHeight : null),
-                    backgroundColor: 'rgba(255,255,255,0.12)',
+                    backgroundColor: 'rgba(255,255,255,0.08)',
                     borderRadius: 0,
                     ...sharedBarOpts
                 },
@@ -75,7 +87,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     label: statLabel,
                     data: mainValues,
                     backgroundColor: colors,
-                    borderRadius: { topLeft: 6, topRight: 6 },
+                    borderRadius: { topLeft: 5, topRight: 5 },
                     borderSkipped: 'bottom',
                     ...sharedBarOpts
                 },
@@ -84,7 +96,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     type: 'line',
                     label: 'Linea',
                     data: thresholdLine,
-                    borderColor: 'rgba(34, 197, 94, 0.5)',
+                    borderColor: 'rgba(34, 197, 94, 0.4)',
                     borderWidth: 1.5,
                     borderDash: [6, 4],
                     fill: false,
@@ -97,7 +109,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
         options: {
             animation: false,
             responsive: true,
-            layout: { padding: { top: 10, right: 10, left: 10, bottom: 12 } },
+            layout: { padding: { top: 10, right: 6, left: 6, bottom: 4 } },
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
@@ -136,12 +148,12 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     borderRadius: 0,
                     padding: { top: 4, bottom: 0, left: 0, right: 0 },
                     font: function() {
-                        const mobile = window.innerWidth <= 768;
-                        const n = values.length;
-                        if (mobile && n > 20) return { weight: "700", size: 8 };
-                        if (mobile && n > 10) return { weight: "700", size: 9 };
-                        if (mobile) return { weight: "700", size: 11 };
-                        if (n > 20) return { weight: "700", size: 11 };
+                        const mob = window.innerWidth <= 768;
+                        if (mob && n > 20) return { weight: "700", size: 7 };
+                        if (mob && n > 10) return { weight: "700", size: 9 };
+                        if (mob) return { weight: "700", size: 11 };
+                        if (n > 25) return { weight: "700", size: 9 };
+                        if (n > 20) return { weight: "700", size: 10 };
                         return { weight: "700", size: 13 };
                     },
                     formatter: (value, context) => {
@@ -164,7 +176,7 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
                     stacked: true,
                     grid: { display: false },
                     offset: true,
-                    ticks: { padding: 8, color: 'rgba(255,255,255,0.5)' }
+                    ticks: xTickOpts
                 }
             }
         },
