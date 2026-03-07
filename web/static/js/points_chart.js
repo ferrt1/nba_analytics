@@ -3,8 +3,8 @@ let _chartValues = [];
 let _chartStubHeight = 0;
 
 // Darker greens/reds for better white text contrast
-const BAR_GREEN = "#15803d";
-const BAR_RED = "#b91c1c";
+const BAR_GREEN = "#1ca54e";
+const BAR_RED = "#DC2626";
 
 // Update only the threshold line and bar colors — no chart recreation, no animation
 function updateChartLine(threshold) {

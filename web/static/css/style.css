@@ -3,9 +3,9 @@
    ══════════════════════════════════════════ */
 
 :root {
-    --bg-1: #0c0e14;
-    --panel: #151921;
-    --panel-2: #1e2330;
+    --bg-1: #01010e;
+    --panel: #0a0f18;
+    --panel-2: #19212e;
     --muted: #7a7f8c;
     --muted-light: #9ca3af;
     --accent: #4a8eff;
@@ -17,7 +17,7 @@
     --border-light: #303849;
     --text: #e2e4e9;
     --text-bright: #f0f1f4;
-    --radius: 16px;
+    --radius: 8px;
     --radius-sm: 12px;
     --radius-xs: 8px;
 }
@@ -37,9 +37,9 @@ body {
 
 body > *:not(.navbar) {
     width: 100%;
-    max-width: 1440px;
-    padding-left: 24px;
-    padding-right: 24px;
+    max-width: 1400px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 /* ── Custom scrollbar ─────────────────── */
@@ -61,9 +61,9 @@ body > *:not(.navbar) {
 }
 
 .navbar-inner {
-    max-width: 1440px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 8px;
     display: flex;
     align-items: center;
     height: 56px;
@@ -99,7 +99,7 @@ body > *:not(.navbar) {
 }
 
 .navbar-brand span {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: -0.3px;
 }
@@ -112,7 +112,7 @@ body > *:not(.navbar) {
 }
 
 .search-form input {
-    height: 48px;
+    height: 40px;
     padding: 0 16px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
@@ -136,7 +136,7 @@ body > *:not(.navbar) {
 }
 
 .search-form button {
-    height: 48px;
+    height: 40px;
     padding: 0 24px;
     border-radius: var(--radius-sm);
     border: none;
@@ -197,7 +197,6 @@ body > *:not(.navbar) {
     background: var(--panel);
     padding: 24px;
     border-radius: var(--radius);
-    margin-bottom: 16px;
     border: 1px solid var(--border);
     width: 100%;
 }
@@ -380,7 +379,7 @@ body > *:not(.navbar) {
 
 .player-info h2 {
     margin: 0;
-    font-size: 24px;
+    font-size: 22px;
     color: #fff;
     font-weight: 800;
     letter-spacing: -0.3px;
@@ -428,8 +427,11 @@ body > *:not(.navbar) {
 .quick-stats {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
     flex: 1;
+    background: var(--panel-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(37, 45, 61, 0.5);
+    overflow: hidden;
 }
 
 .quick-stat {
@@ -439,9 +441,11 @@ body > *:not(.navbar) {
     justify-content: center;
     gap: 4px;
     padding: 10px 8px;
-    background: var(--panel-2);
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(37, 45, 61, 0.5);
+    border-right: 1px solid rgba(37, 45, 61, 0.5);
+}
+
+.quick-stat:last-child {
+    border-right: none;
 }
 
 .qs-label {
@@ -502,6 +506,7 @@ body > *:not(.navbar) {
 }
 
 /* ── Chart section ─────────────────────── */
+
 .chart-section {
     margin-bottom: 8px;
 }
@@ -563,7 +568,7 @@ body > *:not(.navbar) {
 .win-rate-indicators {
     display: flex;
     gap: 10px;
-    margin: 10px 0;
+    margin: 8px 0;
     flex-wrap: wrap;
 }
 
