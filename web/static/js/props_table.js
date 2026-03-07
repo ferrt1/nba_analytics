@@ -115,6 +115,10 @@
     }
 
     function populateGameSelect(matchups) {
+        if (!matchups.includes(currentGame)) {
+            currentGame = '';
+            localStorage.removeItem('props_game');
+        }
         const saved = currentGame;
         gameSelEl.innerHTML = '<option value="">Todos los partidos</option>' +
             matchups.map(m => `<option value="${m}"${m === saved ? ' selected' : ''}>${m}</option>`).join('');
