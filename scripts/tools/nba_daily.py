@@ -119,6 +119,8 @@ def _create_tables_if_missing(conn: sqlite3.Connection):
         fga INTEGER,
         fg3m INTEGER,
         fg3a INTEGER,
+        ftm INTEGER,
+        fta INTEGER,
 
         turnovers INTEGER,
         fouls INTEGER
@@ -185,9 +187,11 @@ def update_for_date(d: date, reset_db: bool = False):
         fga,
         fg3m,
         fg3a,
+        ftm,
+        fta,
         turnovers,
         fouls
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
     for g in games:
@@ -241,6 +245,8 @@ def update_for_date(d: date, reset_db: bool = False):
                         p.get("fieldGoalsAttempted") or p.get("FGA"),
                         p.get("threePointersMade") or p.get("FG3M"),
                         p.get("threePointersAttempted") or p.get("FG3A"),
+                        p.get("freeThrowsMade") or p.get("FTM"),
+                        p.get("freeThrowsAttempted") or p.get("FTA"),
                         p.get("turnovers"),
                         p.get("foulsPersonal") or p.get("PF"),
                     ),

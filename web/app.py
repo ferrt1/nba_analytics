@@ -157,6 +157,8 @@ def player_stats_api():
         "fga": "ps.fga",
         "fg3m": "ps.fg3m",
         "fg3a": "ps.fg3a",
+        "ftm": "ps.ftm",
+        "fta": "ps.fta",
         "turnovers": "ps.turnovers",
         "fouls": "ps.fouls"
     }[stat]
@@ -373,6 +375,8 @@ PROPS_STAT_SQL = {
     "fg3m":     "ps.fg3m",
     "fg3a":     "ps.fg3a",
     "fga":      "ps.fga",
+    "ftm":      "ps.ftm",
+    "fta":      "ps.fta",
     "blocks":   "ps.blocks",
     "steals":   "ps.steals",
     "sb":       "(ps.steals + ps.blocks)",
