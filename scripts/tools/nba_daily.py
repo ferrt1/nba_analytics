@@ -227,28 +227,33 @@ def update_for_date(d: date, reset_db: bool = False):
             _save_boxscore_file(gid, players)
 
             for p in players:
+                def _v(key1, key2):
+                    """Pick first non-None value (0 is valid)."""
+                    v = p.get(key1)
+                    return v if v is not None else p.get(key2)
+
                 cur.execute(
                     insert_players_sql,
                     (
                         gid,
-                        p.get("personId") or p.get("PLAYER_ID"),
+                        _v("personId", "PLAYER_ID"),
                         f"{p.get('firstName', '')} {p.get('familyName', '')}".strip() if p.get('firstName') or p.get('familyName') else p.get("PLAYER_NAME"),
                         p.get("minutes"),
-                        p.get("teamId") or p.get("team_id"),
-                        p.get("teamTricode") or p.get("team_tricode"),
+                        _v("teamId", "team_id"),
+                        _v("teamTricode", "team_tricode"),
                         p.get("points"),
-                        p.get("reboundsTotal") or p.get("REB"),
+                        _v("reboundsTotal", "REB"),
                         p.get("assists"),
                         p.get("steals"),
                         p.get("blocks"),
-                        p.get("fieldGoalsMade") or p.get("FGM"),
-                        p.get("fieldGoalsAttempted") or p.get("FGA"),
-                        p.get("threePointersMade") or p.get("FG3M"),
-                        p.get("threePointersAttempted") or p.get("FG3A"),
-                        p.get("freeThrowsMade") or p.get("FTM"),
-                        p.get("freeThrowsAttempted") or p.get("FTA"),
+                        _v("fieldGoalsMade", "FGM"),
+                        _v("fieldGoalsAttempted", "FGA"),
+                        _v("threePointersMade", "FG3M"),
+                        _v("threePointersAttempted", "FG3A"),
+                        _v("freeThrowsMade", "FTM"),
+                        _v("freeThrowsAttempted", "FTA"),
                         p.get("turnovers"),
-                        p.get("foulsPersonal") or p.get("PF"),
+                        _v("foulsPersonal", "PF"),
                     ),
                 )
 
