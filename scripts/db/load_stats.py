@@ -14,6 +14,8 @@ cur = conn.cursor()
 for stmt in (
     "ALTER TABLE player_stats ADD COLUMN team_id INTEGER",
     "ALTER TABLE player_stats ADD COLUMN team_tricode TEXT",
+    "ALTER TABLE player_stats ADD COLUMN ftm INTEGER",
+    "ALTER TABLE player_stats ADD COLUMN fta INTEGER",
 ):
     try:
         cur.execute(stmt)
@@ -37,9 +39,11 @@ INSERT OR IGNORE INTO player_stats (
     fga,
     fg3m,
     fg3a,
+    ftm,
+    fta,
     turnovers,
     fouls
- ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
 for file in BOXSCORES_DIR.glob("boxscore_*.json"):
@@ -67,6 +71,8 @@ for file in BOXSCORES_DIR.glob("boxscore_*.json"):
                 p.get("fieldGoalsAttempted"),
                 p.get("threePointersMade"),
                 p.get("threePointersAttempted"),
+                p.get("freeThrowsMade"),
+                p.get("freeThrowsAttempted"),
                 p.get("turnovers"),
                 p.get("foulsPersonal"),
             ),
