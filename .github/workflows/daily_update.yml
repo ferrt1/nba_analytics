@@ -89,8 +89,6 @@ jobs:
         run: sudo wg-quick down wg0 2>/dev/null || true
 
       - name: Fetch odds
-        env:
-          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: python scripts/fetch/fetch_odds.py
         continue-on-error: true
 

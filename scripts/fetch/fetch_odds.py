@@ -1,33 +1,36 @@
 """
-Fetches NBA player props from The Odds API and caches them locally.
-Cache TTL: 60 minutes — avoids burning API credits on repeated runs.
-Free tier: 500 requests/month (~8 games × 1 req each + 1 events = ~9/day).
+Fetches NBA player props from Pinnacle's public API (no API key needed).
+Cache TTL: 60 minutes — avoids unnecessary requests.
+Only 2 requests per run (matchups + markets).
 """
 
 import json
-import os
+import re
 import requests
 from pathlib import Path
 from datetime import datetime
-from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
-
-API_KEY  = os.getenv("ODDS_API_KEY", "")
-BASE_URL = "https://api.the-odds-api.com/v4"
+BASE_URL = "https://guest.api.arcadia.pinnacle.com/0.1"
+LEAGUE_ID = 487  # NBA
 CACHE_FILE = Path(__file__).parent.parent.parent / "data" / "raw" / "odds_cache.json"
 CACHE_TTL_MINUTES = 60
 
-MARKET_TO_STAT = {
-    "player_points":                    "points",
-    "player_rebounds":                  "rebounds",
-    "player_assists":                   "assists",
-    "player_threes":                    "fg3m",
-    "player_blocks":                    "blocks",
-    "player_steals":                    "steals",
-    "player_points_rebounds_assists":   "pra",
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/json",
 }
-MARKETS = ",".join(MARKET_TO_STAT.keys())
+
+# Map Pinnacle units to our stat keys
+UNITS_TO_STAT = {
+    "Points":                "points",
+    "Rebounds":              "rebounds",
+    "Assists":               "assists",
+    "ThreePointFieldGoals":  "fg3m",
+    "Blocks":                "blocks",
+    "Steals":                "steals",
+    "PointsReboundsAssist":  "pra",
+    "PointsReboundsAssists": "pra",
+}
 
 
 def _cache_is_fresh():
@@ -44,91 +47,144 @@ def _cache_is_fresh():
 
 
 def fetch_odds():
-    if not API_KEY:
-        print("⚠️  ODDS_API_KEY no configurada en .env — saltando fetch de props")
-        return
-
     if _cache_is_fresh():
-        print("Odds cache is fresh, skipping API fetch")
+        print("Odds cache is fresh, skipping fetch")
         return
 
-    print("Fetching NBA events from The Odds API...")
+    print("Fetching NBA matchups from Pinnacle...")
+
+    # 1. Get all matchups (games + player props)
     try:
         resp = requests.get(
-            f"{BASE_URL}/sports/basketball_nba/events",
-            params={"apiKey": API_KEY},
+            f"{BASE_URL}/leagues/{LEAGUE_ID}/matchups",
+            headers=HEADERS,
             timeout=30,
         )
         resp.raise_for_status()
-        events = resp.json()
+        matchups = resp.json()
     except Exception as e:
-        print(f"Error fetching events: {e}")
+        print(f"Error fetching matchups: {e}")
         return
 
-    print(f"Found {len(events)} events, fetching player props...")
+    # 2. Get all markets (lines + odds)
+    try:
+        resp = requests.get(
+            f"{BASE_URL}/leagues/{LEAGUE_ID}/markets/straight",
+            headers=HEADERS,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        markets = resp.json()
+    except Exception as e:
+        print(f"Error fetching markets: {e}")
+        return
+
+    # Index markets by matchupId
+    markets_by_matchup = {}
+    for m in markets:
+        mid = m.get("matchupId")
+        if mid and m.get("type") == "total":
+            markets_by_matchup[mid] = m
+
+    # Build parent game info (team names)
+    games = {}
+    for item in matchups:
+        if item.get("type") == "matchup":
+            parent = item.get("parent") or item
+            pid = parent.get("id") or item.get("parentId") or item.get("id")
+            participants = parent.get("participants") or item.get("participants", [])
+            home = away = ""
+            for p in participants:
+                if p.get("alignment") == "home":
+                    home = p.get("name", "")
+                elif p.get("alignment") == "away":
+                    away = p.get("name", "")
+            if home and away:
+                games[pid] = {"home": home, "away": away}
+
+    # Also extract game info from special items' parent field
+    for item in matchups:
+        if item.get("type") == "special" and item.get("parent"):
+            parent = item["parent"]
+            pid = parent.get("id")
+            if pid and pid not in games:
+                participants = parent.get("participants", [])
+                home = away = ""
+                for p in participants:
+                    if p.get("alignment") == "home":
+                        home = p.get("name", "")
+                    elif p.get("alignment") == "away":
+                        away = p.get("name", "")
+                if home and away:
+                    games[pid] = {"home": home, "away": away}
+
+    # Extract player props
     all_props = []
-
-    for event in events:
-        event_id  = event.get("id", "")
-        home_team = event.get("home_team", "")
-        away_team = event.get("away_team", "")
-
-        try:
-            odds_resp = requests.get(
-                f"{BASE_URL}/sports/basketball_nba/events/{event_id}/odds",
-                params={
-                    "apiKey":      API_KEY,
-                    "regions":     "us",
-                    "markets":     MARKETS,
-                    "oddsFormat":  "american",
-                },
-                timeout=30,
-            )
-            odds_resp.raise_for_status()
-            event_odds = odds_resp.json()
-        except Exception as e:
-            print(f"  Error props for {away_team} @ {home_team}: {e}")
+    for item in matchups:
+        if item.get("type") != "special":
+            continue
+        special = item.get("special", {})
+        if special.get("category") != "Player Props":
             continue
 
-        # Collect props — first bookmaker wins for each (player, stat) pair
-        seen = set()
-        for bm in event_odds.get("bookmakers", []):
-            for market in bm.get("markets", []):
-                stat = MARKET_TO_STAT.get(market.get("key", ""))
-                if not stat:
-                    continue
+        stat = UNITS_TO_STAT.get(item.get("units", ""))
+        if not stat:
+            continue
 
-                players: dict = {}
-                for outcome in market.get("outcomes", []):
-                    pname = outcome.get("description", "")
-                    side  = outcome.get("name")
-                    point = outcome.get("point")
-                    price = outcome.get("price")
-                    if pname not in players:
-                        players[pname] = {"line": None, "over": None, "under": None}
-                    if side == "Over":
-                        players[pname]["line"] = point
-                        players[pname]["over"] = price
-                    elif side == "Under":
-                        players[pname]["under"] = price
+        # Parse player name from description: "LeBron James (Points)"
+        desc = special.get("description", "")
+        match = re.match(r"^(.+?)\s*\(", desc)
+        if not match:
+            continue
+        player_name = match.group(1).strip()
 
-                for pname, data in players.items():
-                    key = (pname, stat)
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    all_props.append({
-                        "player":     pname,
-                        "stat":       stat,
-                        "line":       data["line"],
-                        "over_odds":  data["over"],
-                        "under_odds": data["under"],
-                        "home_team":  home_team,
-                        "away_team":  away_team,
-                    })
+        # Get Over/Under participant IDs
+        over_id = under_id = None
+        for p in item.get("participants", []):
+            if p.get("name") == "Over":
+                over_id = p.get("id")
+            elif p.get("name") == "Under":
+                under_id = p.get("id")
 
-        count = sum(1 for p in all_props if p["home_team"] == home_team)
-        print(f"  {away_team} @ {home_team}: {count} props")
+        # Find market for this prop
+        market = markets_by_matchup.get(item.get("id"))
+        if not market:
+            continue
+
+        line = None
+        over_odds = None
+        under_odds = None
+        for price in market.get("prices", []):
+            if price.get("participantId") == over_id:
+                line = price.get("points")
+                over_odds = price.get("price")
+            elif price.get("participantId") == under_id:
+                under_odds = price.get("price")
+
+        if line is None:
+            continue
+
+        # Get team names from parent game
+        parent_id = item.get("parentId")
+        game = games.get(parent_id, {})
+
+        all_props.append({
+            "player":     player_name,
+            "stat":       stat,
+            "line":       line,
+            "over_odds":  over_odds,
+            "under_odds": under_odds,
+            "home_team":  game.get("home", ""),
+            "away_team":  game.get("away", ""),
+        })
+
+    # Count props per game for logging
+    game_counts = {}
+    for p in all_props:
+        key = f"{p['away_team']} @ {p['home_team']}"
+        game_counts[key] = game_counts.get(key, 0) + 1
+    for matchup, count in sorted(game_counts.items()):
+        print(f"  {matchup}: {count} props")
 
     CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CACHE_FILE, "w") as f:
