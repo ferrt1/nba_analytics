@@ -523,6 +523,45 @@ body > *:not(.navbar) {
     height: 280px !important;
 }
 
+/* ── Mini tracking charts ─────────────── */
+.mini-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.mini-chart-card {
+    padding: 14px;
+}
+
+.mini-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.mini-chart-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-bright);
+}
+
+.mini-chart-avg {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted-light);
+}
+
+.mini-chart-container {
+    max-width: 100%;
+}
+
+.mini-chart-container canvas {
+    height: 150px !important;
+}
+
 /* ── Line controls ─────────────────────── */
 .line-controls {
     display: flex;
@@ -1035,6 +1074,9 @@ h2, h3 { color: var(--accent); }
     .range-controls { justify-content: center; }
 
     .chart-container canvas { height: 240px !important; }
+
+    .mini-charts-row { grid-template-columns: 1fr; }
+    .mini-chart-container canvas { height: 130px !important; }
 
     .stat-buttons-row button { padding: 6px 10px; font-size: 11px; }
 

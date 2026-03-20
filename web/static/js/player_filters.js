@@ -185,6 +185,11 @@
             }
 
             renderPointsChart(data.labels, data.values, data.dates, currentLine, currentStat);
+
+            // Render mini tracking charts (potential assists & rebound chances)
+            if (typeof renderMiniCharts === 'function') {
+                renderMiniCharts(currentPlayer, currentRange);
+            }
         }).catch(err => {
             console.error("Error cargando chart:", err);
         });

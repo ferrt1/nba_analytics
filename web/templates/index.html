@@ -115,6 +115,28 @@
             </div>
         </div>
 
+        <!-- Mini tracking charts -->
+        <div class="mini-charts-row" id="mini-charts-row" style="display:none;">
+            <div class="mini-chart-card card">
+                <div class="mini-chart-header">
+                    <span class="mini-chart-title">Potential Assists</span>
+                    <span class="mini-chart-avg" id="past-avg">Avg: --</span>
+                </div>
+                <div class="mini-chart-container">
+                    <canvas id="pastChart"></canvas>
+                </div>
+            </div>
+            <div class="mini-chart-card card">
+                <div class="mini-chart-header">
+                    <span class="mini-chart-title">Rebound Chances</span>
+                    <span class="mini-chart-avg" id="rbc-avg">Avg: --</span>
+                </div>
+                <div class="mini-chart-container">
+                    <canvas id="rbcChart"></canvas>
+                </div>
+            </div>
+        </div>
+
         <!-- Stat category buttons -->
         <div class="stat-buttons-row">
             <button data-stat="points" class="active">PTS</button>
@@ -136,9 +158,6 @@
             <button data-stat="fta">FTA</button>
             <button data-stat="turnovers">TO</button>
             <button data-stat="fouls">FOULS</button>
-            <button data-stat="reb_chances">RBC</button>
-            <button data-stat="potential_ast">PAST</button>
-            <button data-stat="usage_pct">USG%</button>
         </div>
 
 <div class="props-card" id="props-section">
@@ -309,6 +328,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="{{ url_for('static', filename='js/team_emojis.js') }}"></script>
     <script src="{{ url_for('static', filename='js/points_chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mini_charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/player_display.js') }}"></script>
     <script src="{{ url_for('static', filename='js/player_filters.js') }}"></script>
     <script src="{{ url_for('static', filename='js/team_sidebar.js') }}"></script>
