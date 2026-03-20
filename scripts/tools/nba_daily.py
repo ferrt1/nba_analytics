@@ -6,7 +6,7 @@ import json
 import time
 import math
 
-from nba_api.stats.endpoints import scoreboardv3, boxscoretraditionalv3
+from nba_api.stats.endpoints import scoreboardv3, boxscoretraditionalv3, boxscoreplayertrackv3, boxscoreusagev3
 
 
 def _convert_et_to_argentina(et_time_str: str, game_date: date) -> str:
@@ -123,9 +123,30 @@ def _create_tables_if_missing(conn: sqlite3.Connection):
         fta INTEGER,
 
         turnovers INTEGER,
-        fouls INTEGER
+        fouls INTEGER,
+
+        reb_chances_off INTEGER,
+        reb_chances_def INTEGER,
+        reb_chances INTEGER,
+        secondary_ast INTEGER,
+        potential_ast INTEGER,
+        usage_pct REAL
     )
     """)
+
+    # Migration for existing DBs
+    for col in (
+        "reb_chances_off INTEGER",
+        "reb_chances_def INTEGER",
+        "reb_chances INTEGER",
+        "secondary_ast INTEGER",
+        "potential_ast INTEGER",
+        "usage_pct REAL",
+    ):
+        try:
+            cur.execute(f"ALTER TABLE player_stats ADD COLUMN {col}")
+        except Exception:
+            pass
 
     conn.commit()
 
@@ -146,6 +167,47 @@ def _fetch_boxscore_players(game_id: str, retries: int = 3) -> list[dict]:
         except Exception as e:
             time.sleep(5 * attempt)
     return []
+
+
+def _fetch_tracking_data(game_id: str) -> dict:
+    """Fetch tracking + usage data for a game. Returns {player_name: {stats}}."""
+    result = {}
+    try:
+        track = boxscoreplayertrackv3.BoxScorePlayerTrackV3(game_id=game_id, timeout=60)
+        data = track.get_dict()
+        bp = data.get("boxScorePlayerTrack", {})
+        for side in ("homeTeam", "awayTeam"):
+            for p in bp.get(side, {}).get("players", []):
+                name = f"{p.get('firstName', '')} {p.get('familyName', '')}".strip()
+                s = p.get("statistics", {})
+                result[name] = {
+                    "reb_chances_off": s.get("reboundChancesOffensive"),
+                    "reb_chances_def": s.get("reboundChancesDefensive"),
+                    "reb_chances": s.get("reboundChancesTotal"),
+                    "secondary_ast": s.get("secondaryAssists"),
+                    "potential_ast": s.get("passes"),
+                }
+    except Exception:
+        pass
+
+    try:
+        usage = boxscoreusagev3.BoxScoreUsageV3(game_id=game_id, timeout=60)
+        data = usage.get_dict()
+        bu = data.get("boxScoreUsage", {})
+        for side in ("homeTeam", "awayTeam"):
+            for p in bu.get(side, {}).get("players", []):
+                name = f"{p.get('firstName', '')} {p.get('familyName', '')}".strip()
+                s = p.get("statistics", {})
+                usg = s.get("usagePercentage")
+                if usg is not None:
+                    usg = round(usg * 100, 1)
+                if name not in result:
+                    result[name] = {}
+                result[name]["usage_pct"] = usg
+    except Exception:
+        pass
+
+    return result
 
 
 def _players_exist(conn: sqlite3.Connection, game_id: str) -> bool:
@@ -258,6 +320,27 @@ def update_for_date(d: date, reset_db: bool = False):
                 )
 
             conn.commit()
+
+            # Fetch tracking data (rebound chances, potential assists, usage)
+            time.sleep(1)
+            tracking = _fetch_tracking_data(gid)
+            if tracking:
+                for pname, stats in tracking.items():
+                    cur.execute("""
+                        UPDATE player_stats
+                        SET reb_chances_off=?, reb_chances_def=?, reb_chances=?,
+                            secondary_ast=?, potential_ast=?, usage_pct=?
+                        WHERE game_id=? AND player_name=?
+                    """, (
+                        stats.get("reb_chances_off"),
+                        stats.get("reb_chances_def"),
+                        stats.get("reb_chances"),
+                        stats.get("secondary_ast"),
+                        stats.get("potential_ast"),
+                        stats.get("usage_pct"),
+                        gid, pname,
+                    ))
+                conn.commit()
 
         # Respetar límites de rate
         time.sleep(1)

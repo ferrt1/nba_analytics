@@ -50,7 +50,8 @@ function renderPointsChart(labels, values, dates, threshold, stat) {
         points: 'Pts', rebounds: 'Reb', assists: 'Ast', pra: 'PRA',
         pa: 'PA', pr: 'PR', ra: 'RA', sb: 'S+B',
         minutes: 'Min', steals: 'Stl', blocks: 'Blk', fgm: 'FGM',
-        fga: 'FGA', fg3m: '3PM', fg3a: '3PA', ftm: 'FTM', fta: 'FTA', turnovers: 'TO', fouls: 'Fouls'
+        fga: 'FGA', fg3m: '3PM', fg3a: '3PA', ftm: 'FTM', fta: 'FTA', turnovers: 'TO', fouls: 'Fouls',
+        reb_chances: 'RBC', potential_ast: 'PAST', usage_pct: 'USG%'
     };
     const statLabel = statLabels[stat] || 'Val';
 

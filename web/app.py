@@ -160,7 +160,10 @@ def player_stats_api():
         "ftm": "ps.ftm",
         "fta": "ps.fta",
         "turnovers": "ps.turnovers",
-        "fouls": "ps.fouls"
+        "fouls": "ps.fouls",
+        "reb_chances": "ps.reb_chances",
+        "potential_ast": "ps.potential_ast",
+        "usage_pct": "ps.usage_pct",
     }[stat]
 
     # Teammate filter (with/without)

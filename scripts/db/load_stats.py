@@ -16,6 +16,12 @@ for stmt in (
     "ALTER TABLE player_stats ADD COLUMN team_tricode TEXT",
     "ALTER TABLE player_stats ADD COLUMN ftm INTEGER",
     "ALTER TABLE player_stats ADD COLUMN fta INTEGER",
+    "ALTER TABLE player_stats ADD COLUMN reb_chances_off INTEGER",
+    "ALTER TABLE player_stats ADD COLUMN reb_chances_def INTEGER",
+    "ALTER TABLE player_stats ADD COLUMN reb_chances INTEGER",
+    "ALTER TABLE player_stats ADD COLUMN secondary_ast INTEGER",
+    "ALTER TABLE player_stats ADD COLUMN potential_ast INTEGER",
+    "ALTER TABLE player_stats ADD COLUMN usage_pct REAL",
 ):
     try:
         cur.execute(stmt)
