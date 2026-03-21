@@ -21,7 +21,7 @@ jobs:
         run: pip install nba_api requests python-dotenv pandas
 
       - name: Create directories
-        run: mkdir -p db data/raw data/raw/boxscores data/raw/tracking
+        run: mkdir -p db data/raw data/raw/boxscores data/raw/tracking data/raw/potential_ast
 
       - name: Download current DB from VPS
         env:
@@ -76,6 +76,15 @@ jobs:
 
       - name: Load tracking into DB
         run: python scripts/db/load_tracking.py
+        continue-on-error: true
+
+      - name: Fetch potential assists
+        run: python scripts/fetch/fetch_potential_ast.py
+        timeout-minutes: 15
+        continue-on-error: true
+
+      - name: Load potential assists into DB
+        run: python scripts/db/load_potential_ast.py
         continue-on-error: true
 
       - name: Save today games

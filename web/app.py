@@ -132,7 +132,12 @@ def player():
 def player_stats_api():
     player = request.args.get("player")
     stat = request.args.get("stat", "points")
-    limit = request.args.get("limit", "10")
+    try:
+        limit = request.args.get("limit", "10")
+        if limit != "h2h":
+            int(limit)  # validate it's a number
+    except ValueError:
+        return jsonify({"error": "Invalid limit"}), 400
     with_player = request.args.get("with_player", "")
     without_player = request.args.get("without_player", "")
     min_minutes = request.args.get("min_minutes", "")
@@ -141,7 +146,7 @@ def player_stats_api():
     conn = get_db()
     cur = conn.cursor()
 
-    stat_sql = {
+    stat_sql_map = {
         "points": "ps.points",
         "rebounds": "ps.rebounds",
         "assists": "ps.assists",
@@ -164,7 +169,10 @@ def player_stats_api():
         "reb_chances": "ps.reb_chances",
         "potential_ast": "ps.potential_ast",
         "usage_pct": "ps.usage_pct",
-    }[stat]
+    }
+    stat_sql = stat_sql_map.get(stat)
+    if not stat_sql:
+        return jsonify({"error": "Invalid stat"}), 400
 
     # Teammate filter (with/without)
     teammate_filter = ""
@@ -598,4 +606,4 @@ def props_api():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG", "0") == "1")

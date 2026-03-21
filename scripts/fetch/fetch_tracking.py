@@ -46,7 +46,6 @@ def fetch_tracking(game_id: str) -> dict:
                     "reb_chances_def": s.get("reboundChancesDefensive"),
                     "reb_chances": s.get("reboundChancesTotal"),
                     "secondary_ast": s.get("secondaryAssists"),
-                    "potential_ast": s.get("passes"),
                 }
     except Exception as e:
         print(f"  Tracking error {game_id}: {e}")

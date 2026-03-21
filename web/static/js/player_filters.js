@@ -225,6 +225,9 @@
                 }
                 updateWinRateIndicators(currentLine);
                 redrawChart();
+                if (typeof renderMiniCharts === 'function') {
+                    renderMiniCharts(currentPlayer, currentRange);
+                }
             } else {
                 loadChart();
             }
