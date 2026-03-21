@@ -3,12 +3,13 @@ name: Daily NBA Update
 on:
   schedule:
     - cron: '0 13 * * *'  # 10:00 AM Argentina (UTC-3)
+    - cron: '0 16 * * *'  # 1:00 PM Argentina (UTC-3)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -80,7 +81,7 @@ jobs:
 
       - name: Fetch potential assists
         run: python scripts/fetch/fetch_potential_ast.py
-        timeout-minutes: 15
+        timeout-minutes: 30
         continue-on-error: true
 
       - name: Load potential assists into DB
