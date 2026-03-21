@@ -25,16 +25,15 @@
         <a href="/" class="navbar-brand">
             <span>NBA Analytics</span>
         </a>
+        <form action="/player" class="search-form">
+            <div class="search-input-wrap">
+                <input type="text" name="name" placeholder="Buscar jugador..." required autocomplete="off">
+                <div id="search-suggestions" class="search-suggestions"></div>
+            </div>
+            <button>Buscar</button>
+        </form>
     </div>
 </header>
-
-<form action="/player" class="search-form">
-    <div class="search-input-wrap">
-        <input type="text" name="name" placeholder="Jugador (ej: Wembanyama)" required autocomplete="off">
-        <div id="search-suggestions" class="search-suggestions"></div>
-    </div>
-    <button>Buscar</button>
-</form>
 
 {% if error %}
 <p class="error">{{ error }}</p>
@@ -108,35 +107,6 @@
         <!-- Section 2: Hit Rate Cards (no card wrapper) -->
         <div id="win-rate-indicators" class="win-rate-indicators"></div>
 
-        <!-- Section 3: Chart Card -->
-        <div class="chart-card card">
-            <div class="chart-container">
-                <canvas id="pointsChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Mini tracking charts -->
-        <div class="mini-charts-row" id="mini-charts-row" style="display:none;">
-            <div class="mini-chart-card card">
-                <div class="mini-chart-header">
-                    <span class="mini-chart-title">Potential Assists</span>
-                    <span class="mini-chart-avg" id="past-avg">Avg: --</span>
-                </div>
-                <div class="mini-chart-container">
-                    <canvas id="pastChart"></canvas>
-                </div>
-            </div>
-            <div class="mini-chart-card card">
-                <div class="mini-chart-header">
-                    <span class="mini-chart-title">Rebound Chances</span>
-                    <span class="mini-chart-avg" id="rbc-avg">Avg: --</span>
-                </div>
-                <div class="mini-chart-container">
-                    <canvas id="rbcChart"></canvas>
-                </div>
-            </div>
-        </div>
-
         <!-- Stat category buttons -->
         <div class="stat-buttons-row">
             <button data-stat="points" class="active">PTS</button>
@@ -158,6 +128,35 @@
             <button data-stat="fta">FTA</button>
             <button data-stat="turnovers">TO</button>
             <button data-stat="fouls">FOULS</button>
+        </div>
+
+        <!-- Chart Card -->
+        <div class="chart-card card">
+            <div class="chart-container">
+                <div id="pointsChart" style="width:100%;height:100%;"></div>
+            </div>
+        </div>
+
+        <!-- Mini tracking charts -->
+        <div class="mini-charts-row" id="mini-charts-row" style="display:none;">
+            <div class="mini-chart-card card">
+                <div class="mini-chart-header">
+                    <span class="mini-chart-title">Potential Assists</span>
+                    <span class="mini-chart-avg" id="past-avg">Avg: --</span>
+                </div>
+                <div class="mini-chart-container">
+                    <div id="pastChart" style="width:100%;height:100%;"></div>
+                </div>
+            </div>
+            <div class="mini-chart-card card">
+                <div class="mini-chart-header">
+                    <span class="mini-chart-title">Rebound Chances</span>
+                    <span class="mini-chart-avg" id="rbc-avg">Avg: --</span>
+                </div>
+                <div class="mini-chart-container">
+                    <div id="rbcChart" style="width:100%;height:100%;"></div>
+                </div>
+            </div>
         </div>
 
 <div class="props-card" id="props-section">
@@ -324,8 +323,12 @@
 </div>
 {% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<div class="info-bar">
+    <span>Actualización diaria — 11:00 AM ARG</span>
+    <span>Creado por ferrt</span>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <script src="{{ url_for('static', filename='js/team_emojis.js') }}"></script>
     <script src="{{ url_for('static', filename='js/points_chart.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mini_charts.js') }}"></script>

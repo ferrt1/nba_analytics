@@ -230,7 +230,9 @@ def player_stats_api():
             cur.execute(f"""
                 SELECT
                     g.game_date,
-                    g.home_team || ' vs ' || g.away_team AS matchup,
+                    COALESCE(g.away_tricode, g.away_team) AS away_tri,
+                    COALESCE(g.home_tricode, g.home_team) AS home_tri,
+                    ps.team_tricode AS player_tri,
                     {stat_sql} AS value
                 FROM player_stats ps
                 JOIN games g ON ps.game_id = g.game_id
@@ -248,7 +250,9 @@ def player_stats_api():
             cur.execute(f"""
                 SELECT
                     g.game_date,
-                    g.home_team || ' vs ' || g.away_team AS matchup,
+                    COALESCE(g.away_tricode, g.away_team) AS away_tri,
+                    COALESCE(g.home_tricode, g.home_team) AS home_tri,
+                    ps.team_tricode AS player_tri,
                     {stat_sql} AS value
                 FROM player_stats ps
                 JOIN games g ON ps.game_id = g.game_id
@@ -262,7 +266,9 @@ def player_stats_api():
         cur.execute(f"""
             SELECT
                 g.game_date,
-                g.home_team || ' vs ' || g.away_team AS matchup,
+                COALESCE(g.away_tricode, g.away_team) AS away_tri,
+                    COALESCE(g.home_tricode, g.home_team) AS home_tri,
+                    ps.team_tricode AS player_tri,
                 {stat_sql} AS value
             FROM player_stats ps
             JOIN games g ON ps.game_id = g.game_id
@@ -275,7 +281,23 @@ def player_stats_api():
         rows = cur.fetchall()
     conn.close()
 
-    labels_out = [r["matchup"] for r in rows][::-1]
+    # Build labels: opponent tricode only
+    # Build tooltip info: "vs OPP" (home) or "en OPP" (away)
+    labels_out = []
+    tooltip_labels = []
+    for r in rows:
+        player_tri = r["player_tri"]
+        home_tri = r["home_tri"]
+        away_tri = r["away_tri"]
+        if player_tri == home_tri:
+            opponent = away_tri
+            tooltip_labels.append(f"vs {opponent}")
+        else:
+            opponent = home_tri
+            tooltip_labels.append(f"en {opponent}")
+        labels_out.append(opponent)
+    labels_out = labels_out[::-1]
+    tooltip_labels = tooltip_labels[::-1]
     dates_out = [r["game_date"] for r in rows][::-1]
 
     # convert values and handle minutes specially (MM:SS -> decimal minutes)
@@ -320,6 +342,7 @@ def player_stats_api():
         "labels": labels_out,
         "values": values_out,
         "dates": dates_out,
+        "tooltip_labels": tooltip_labels,
         "avg": avg
     }
 

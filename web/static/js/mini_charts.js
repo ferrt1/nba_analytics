@@ -3,80 +3,117 @@
     let pastChartInstance = null;
     let rbcChartInstance = null;
 
-    const BAR_COLOR = '#6b7280';
+    const BAR_COLOR = '#777777';
 
-    function buildMiniChart(canvasId, labels, values, avgElId) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return null;
+    function buildMiniChart(containerId, labels, values, avgElId) {
+        const container = document.getElementById(containerId);
+        if (!container) return null;
 
-        const avg = values.filter(v => v != null).length
-            ? (values.filter(v => v != null).reduce((a, b) => a + b, 0) / values.filter(v => v != null).length)
-            : 0;
+        const nums = values.filter(v => v != null);
+        const avg = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length) : 0;
         const avgEl = document.getElementById(avgElId);
         if (avgEl) avgEl.textContent = `Avg: ${avg.toFixed(1)}`;
 
-        // Short labels (team tricode from matchup)
-        const shortLabels = labels.map(l => {
-            const parts = l.split(' vs ');
-            return parts.length === 2 ? parts[0].substring(0, 3) : l.substring(0, 5);
-        });
+        const maxVal = nums.length ? Math.max(...nums) : 10;
+        const yMax = Math.ceil(maxVal * 1.2);
 
-        return new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: shortLabels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: BAR_COLOR,
-                    borderRadius: 3,
-                    barThickness: Math.max(8, Math.min(20, Math.floor(canvas.parentElement.offsetWidth / values.length) - 6)),
-                }]
+        const n = values.length;
+        const isMobile = window.innerWidth <= 768;
+        const containerWidth = container.offsetWidth;
+        const yAxisWidth = 30;
+
+        // Dynamic barWidth — same logic as main chart but scaled down
+        const maxBarSpace = (containerWidth - yAxisWidth - 10) / Math.max(n, 1);
+        const barWidth = isMobile
+            ? Math.max(6, Math.min(16, Math.floor(maxBarSpace * 0.7)))
+            : Math.max(10, Math.min(24, Math.floor(maxBarSpace * 0.7)));
+        const gap = Math.max(2, Math.floor(barWidth * 0.25));
+
+        // Center bars, pin y-axis to left
+        const totalBarsWidth = n * (barWidth + gap);
+        const maxGridWidth = containerWidth - yAxisWidth - 10;
+        const gridWidth = Math.min(totalBarsWidth, maxGridWidth);
+        const centerOffset = Math.floor((maxGridWidth - gridWidth) / 2);
+        const gridLeft = yAxisWidth + centerOffset;
+
+        const instance = echarts.init(container, null, { renderer: 'canvas' });
+        instance.setOption({
+            animation: false,
+            grid: {
+                left: gridLeft,
+                right: 8,
+                top: 20,
+                bottom: 28,
+                containLabel: false,
+                width: gridWidth,
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'end',
-                        color: '#9ca3af',
-                        font: { size: 10, weight: '600' },
-                        formatter: v => v != null ? v : '',
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(21, 25, 33, 0.95)',
-                        titleColor: '#e2e4e9',
-                        bodyColor: '#9ca3af',
-                        callbacks: {
-                            title: (items) => labels[items[0].dataIndex] || '',
-                        }
-                    }
+            xAxis: {
+                type: 'category',
+                data: labels,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: {
+                    color: 'rgba(255,255,255,0.4)',
+                    fontSize: isMobile ? (n > 20 ? 6 : 8) : 9,
+                    rotate: (isMobile && n > 8) || n > 12 ? 45 : 0,
+                    interval: isMobile ? (n > 20 ? 2 : n > 12 ? 1 : 0) : (n > 20 ? 1 : 0),
                 },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            color: '#7a7f8c',
-                            font: { size: 9 },
-                            maxRotation: 45,
-                            autoSkip: true,
-                            maxTicksLimit: 10,
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(37, 45, 61, 0.4)' },
-                        ticks: {
-                            color: '#7a7f8c',
-                            font: { size: 9 },
-                            stepSize: 1,
-                        }
-                    }
+            },
+            yAxis: {
+                type: 'value',
+                min: 0,
+                max: yMax,
+                splitLine: {
+                    lineStyle: { color: 'rgba(255,255,255,0.04)', type: 'dashed' }
+                },
+                axisLabel: {
+                    color: 'rgba(255,255,255,0.35)',
+                    fontSize: 9,
+                    margin: centerOffset + 6,
+                },
+                axisLine: { show: false },
+                axisTick: { show: false },
+            },
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(17, 17, 17, 0.95)',
+                borderColor: 'rgba(38, 38, 38, 0.8)',
+                borderWidth: 1,
+                textStyle: { color: '#d4d4d4', fontSize: 12 },
+                formatter: function(params) {
+                    const bar = params[0];
+                    if (!bar) return '';
+                    return `<b>${labels[bar.dataIndex]}</b><br/>${bar.value}`;
                 }
             },
-            plugins: [ChartDataLabels]
+            series: [{
+                type: 'bar',
+                data: values.map(v => v != null ? v : 0),
+                barWidth: barWidth,
+                barCategoryGap: gap + 'px',
+                itemStyle: {
+                    color: BAR_COLOR,
+                    borderRadius: [3, 3, 0, 0],
+                },
+                label: {
+                    show: !(isMobile && n > 15),
+                    position: 'insideTop',
+                    color: '#ffffff',
+                    fontSize: isMobile ? 7 : (n > 20 ? 8 : 10),
+                    fontWeight: 600,
+                    offset: [0, 2],
+                    formatter: function(params) {
+                        return values[params.dataIndex] != null ? values[params.dataIndex] : '';
+                    }
+                },
+            }]
         });
+
+        window.addEventListener('resize', function() {
+            if (instance && !instance.isDisposed()) instance.resize();
+        });
+
+        return instance;
     }
 
     window.renderMiniCharts = function (player, range) {
@@ -90,7 +127,6 @@
             fetch(pastUrl).then(r => r.json()),
             fetch(rbcUrl).then(r => r.json())
         ]).then(([pastData, rbcData]) => {
-            // Check if there's any real data
             const hasPast = pastData.values && pastData.values.some(v => v != null);
             const hasRbc = rbcData.values && rbcData.values.some(v => v != null);
 
@@ -101,16 +137,18 @@
 
             row.style.display = 'grid';
 
-            // Destroy old charts
-            if (pastChartInstance) { pastChartInstance.destroy(); pastChartInstance = null; }
-            if (rbcChartInstance) { rbcChartInstance.destroy(); rbcChartInstance = null; }
+            if (pastChartInstance) { pastChartInstance.dispose(); pastChartInstance = null; }
+            if (rbcChartInstance) { rbcChartInstance.dispose(); rbcChartInstance = null; }
 
+            // Small delay so the container has dimensions before ECharts inits
+            setTimeout(() => {
             if (hasPast) {
                 pastChartInstance = buildMiniChart('pastChart', pastData.labels, pastData.values, 'past-avg');
             }
             if (hasRbc) {
                 rbcChartInstance = buildMiniChart('rbcChart', rbcData.labels, rbcData.values, 'rbc-avg');
             }
+            }, 50);
         }).catch(err => {
             console.error('Mini charts error:', err);
             row.style.display = 'none';
@@ -120,7 +158,7 @@
     window.hideMiniCharts = function () {
         const row = document.getElementById('mini-charts-row');
         if (row) row.style.display = 'none';
-        if (pastChartInstance) { pastChartInstance.destroy(); pastChartInstance = null; }
-        if (rbcChartInstance) { rbcChartInstance.destroy(); rbcChartInstance = null; }
+        if (pastChartInstance) { pastChartInstance.dispose(); pastChartInstance = null; }
+        if (rbcChartInstance) { rbcChartInstance.dispose(); rbcChartInstance = null; }
     };
 })();

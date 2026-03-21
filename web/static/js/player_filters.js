@@ -146,7 +146,7 @@
     function redrawChart() {
         const data = allStatsData[currentRange];
         if (!data) return;
-        renderPointsChart(data.labels, data.values, data.dates, currentLine, currentStat);
+        renderPointsChart(data.labels, data.values, data.dates, currentLine, currentStat, data.tooltip_labels);
     }
 
     function loadChart() {
@@ -184,7 +184,7 @@
                 updateQuickStats(dataList[0], dataList[1], dataList[2], dataList[4]);
             }
 
-            renderPointsChart(data.labels, data.values, data.dates, currentLine, currentStat);
+            renderPointsChart(data.labels, data.values, data.dates, currentLine, currentStat, data.tooltip_labels);
 
             // Render mini tracking charts (potential assists & rebound chances)
             if (typeof renderMiniCharts === 'function') {
