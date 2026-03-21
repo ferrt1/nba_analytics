@@ -15,14 +15,16 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_dates_missing_potential_ast() -> list[str]:
-    """Get game dates that have player_stats but no potential_ast data."""
+    """Get game dates where NO player has potential_ast data (fully missing)."""
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute("""
         SELECT DISTINCT g.game_date
         FROM player_stats ps
         JOIN games g ON ps.game_id = g.game_id
-        WHERE ps.potential_ast IS NULL AND ps.game_id LIKE '002%'
+        WHERE ps.game_id LIKE '002%'
+        GROUP BY g.game_date
+        HAVING SUM(CASE WHEN ps.potential_ast IS NOT NULL THEN 1 ELSE 0 END) = 0
         ORDER BY g.game_date DESC
     """)
     dates = [r[0] for r in cur.fetchall()]
